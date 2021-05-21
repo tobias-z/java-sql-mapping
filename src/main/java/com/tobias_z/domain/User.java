@@ -1,13 +1,13 @@
 package com.tobias_z.domain;
 
+import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
-import com.tobias_z.annotations.GeneratedKey;
 import com.tobias_z.annotations.Table;
 
 @Table(name = "users")
 public class User {
 
-    @GeneratedKey
+    @PrimaryKey
     @Column(name = "id")
     private Integer id;
 

@@ -1,18 +1,15 @@
 package com.tobias_z.api;
 
+import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
-import com.tobias_z.annotations.GeneratedKey;
-import com.tobias_z.exceptions.DatabaseException;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ResultSetMapper<T> {
 
@@ -53,7 +50,7 @@ public class ResultSetMapper<T> {
         if (resultSet.next()) {
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
-                GeneratedKey key = field.getAnnotation(GeneratedKey.class);
+                PrimaryKey key = field.getAnnotation(PrimaryKey.class);
                 Column column = field.getAnnotation(Column.class);
                 if (key != null && column != null) {
                     int id = resultSet.getInt(1);

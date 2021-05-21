@@ -6,7 +6,7 @@ import com.tobias_z.Database;
 import com.tobias_z.Inserted;
 import com.tobias_z.SQLQuery;
 import com.tobias_z.annotations.Column;
-import com.tobias_z.annotations.GeneratedKey;
+import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Table;
 import com.tobias_z.api.insert.Insert;
 import com.tobias_z.domain.User;
@@ -69,13 +69,13 @@ public class DatabaseRepository implements Database {
     private <T> Column getPrimaryKeyColumn(Class<T> dbTableClass) throws NoGeneratedKeyFound {
         Field[] fields = dbTableClass.getDeclaredFields();
         for (Field field : fields) {
-            GeneratedKey generatedKey = field.getAnnotation(GeneratedKey.class);
+            PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
             Column column = field.getAnnotation(Column.class);
-            if (generatedKey != null && column != null) {
+            if (primaryKey != null && column != null) {
                 return column;
             }
         }
-        throw new NoGeneratedKeyFound("No GeneratedKey annotation was found on: " + dbTableClass.getName());
+        throw new NoGeneratedKeyFound("No PrimaryKey annotation was found on: " + dbTableClass.getName());
     }
 
     @Override
