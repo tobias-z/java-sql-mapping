@@ -12,10 +12,10 @@ public interface Database {
 
     void insert(SQLQuery query) throws DatabaseException;
 
-    <T, PrimaryKey> T select(PrimaryKey primaryKey, Class<T> dbTableClass) throws DatabaseException, NoTableFound, NoGeneratedKeyFound;
+    <T, PrimaryKey> T get(PrimaryKey primaryKey, Class<T> dbTableClass) throws DatabaseException, NoTableFound, NoGeneratedKeyFound;
 
     <T> List<T> select(SQLQuery query, Class<T> dbTableClass) throws DatabaseException;
 
-    <T> List<T> selectAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound;
+    <T> List<T> getAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound;
 
 }

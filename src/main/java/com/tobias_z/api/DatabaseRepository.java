@@ -119,7 +119,7 @@ public class DatabaseRepository implements Database {
     }
 
     @Override
-    public <T, PrimaryKey> T select(PrimaryKey primaryKey, Class<T> dbTableClass)
+    public <T, PrimaryKey> T get(PrimaryKey primaryKey, Class<T> dbTableClass)
         throws DatabaseException, NoTableFound, NoGeneratedKeyFound {
         try (Connection connection = getConnection()) {
             Table table = getTableAnnotation(dbTableClass);
@@ -149,7 +149,7 @@ public class DatabaseRepository implements Database {
     }
 
     @Override
-    public <T> List<T> selectAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound {
+    public <T> List<T> getAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound {
         try (Connection connection = getConnection()) {
             Table table = getTableAnnotation(dbTableClass);
             var ps = connection.prepareStatement("SELECT * FROM " + table.name());
@@ -164,7 +164,12 @@ public class DatabaseRepository implements Database {
     public static void main(String[] args) {
         Database db = DBConnection.createConnection(new Config());
         try {
-            List<User> users = db.selectAll(User.class);
+            List<User> users = db.getAll(User.class);
+
+            User user2 = db.get(1, User.class);
+
+            SQLQuery allQuery = new SQLQuery("SELECT * FROM users");
+            List<User> users2 = db.select(allQuery, User.class);
 
             SQLQuery insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", "Bob Martin Jjjj");
@@ -172,12 +177,6 @@ public class DatabaseRepository implements Database {
                 insertUserQuery,
                 User.class
             ).getGeneratedEntity();
-
-            User user2 = db.select(1, User.class);
-
-            SQLQuery allQuery = new SQLQuery("SELECT * FROM users");
-            List<User> users2 = db.select(allQuery, User.class);
-
         } catch (DatabaseException | NoTableFound | NoGeneratedKeyFound e) {
             e.printStackTrace();
         }
