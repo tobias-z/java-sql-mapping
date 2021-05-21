@@ -16,6 +16,6 @@ public interface Database {
 
     <T> List<T> select(SQLQuery query, Class<T> dbTableClass) throws DatabaseException;
 
-    SQLQuery createSQLQuery(String sql);
+    <T> List<T> selectAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound;
 
 }

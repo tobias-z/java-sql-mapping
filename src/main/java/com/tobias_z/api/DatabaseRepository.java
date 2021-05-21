@@ -93,7 +93,8 @@ public class DatabaseRepository implements Database {
 
                 try (Connection conn = getConnection()) {
                     var ps = conn.prepareStatement(
-                        "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = " + id);
+                        "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = ?;");
+                    ps.setInt(1, id);
                     ResultSet resultSet = ps.executeQuery();
                     ResultSetMapper<T> mapper = new ResultSetMapper<>();
                     return mapper.mapSingleResult(dbTableClass, resultSet);
@@ -148,20 +149,36 @@ public class DatabaseRepository implements Database {
     }
 
     @Override
-    public SQLQuery createSQLQuery(String sql) {
-        return new SQLQuery(sql);
+    public <T> List<T> selectAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound {
+        try (Connection connection = getConnection()) {
+            Table table = getTableAnnotation(dbTableClass);
+            var ps = connection.prepareStatement("SELECT * FROM " + table.name());
+            ResultSet resultSet = ps.executeQuery();
+            ResultSetMapper<T> mapper = new ResultSetMapper<>();
+            return mapper.mapListOfResults(dbTableClass, resultSet);
+        } catch (SQLException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
     public static void main(String[] args) {
         Database db = DBConnection.createConnection(new Config());
-        SQLQuery query = db.createSQLQuery("SELECT * FROM users")
-            .addParameter("id", 1);
         try {
-            List<User> users = db.select(query, User.class);
-            for (User user : users) {
-                System.out.println(user);
-            }
-        } catch (DatabaseException e) {
+            List<User> users = db.selectAll(User.class);
+
+            SQLQuery insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
+                .addParameter("name", "Bob Martin Jjjj");
+            User user = db.insert(
+                insertUserQuery,
+                User.class
+            ).getGeneratedEntity();
+
+            User user2 = db.select(1, User.class);
+
+            SQLQuery allQuery = new SQLQuery("SELECT * FROM users");
+            List<User> users2 = db.select(allQuery, User.class);
+
+        } catch (DatabaseException | NoTableFound | NoGeneratedKeyFound e) {
             e.printStackTrace();
         }
     }

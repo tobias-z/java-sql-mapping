@@ -13,8 +13,8 @@ public class SQLQuery {
         this.parameters = new HashMap<>();
     }
 
-    public <T> SQLQuery addParameter(String name, T value) {
-        parameters.put(name, String.valueOf(value));
+    public <T> SQLQuery addParameter(String parameterName, T value) {
+        parameters.put(parameterName, String.valueOf(value));
         return this;
     }
 
