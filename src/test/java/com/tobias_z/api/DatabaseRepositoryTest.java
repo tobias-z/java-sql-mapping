@@ -9,13 +9,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
 import com.tobias_z.SQLQuery;
-import com.tobias_z.api.connection.MySQLConfig;
+import com.tobias_z.api.connection.MySQLTestDBConfig;
 import com.tobias_z.api.connection.SetupIntegrationTests;
 import com.tobias_z.entities.NoIncrement;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
 import java.util.List;
-import org.apache.ibatis.jdbc.SQL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +26,7 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        DBConfig dbConfig = new MySQLConfig();
+        DBConfig dbConfig = new MySQLTestDBConfig();
         DB = new DatabaseRepository(dbConfig);
         runTestDatabaseMigration(dbConfig);
     }

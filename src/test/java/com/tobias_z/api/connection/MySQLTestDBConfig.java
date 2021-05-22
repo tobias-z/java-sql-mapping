@@ -5,7 +5,7 @@ import com.tobias_z.DBSetting;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MySQLConfig implements DBConfig {
+public class MySQLTestDBConfig implements DBConfig {
 
     @Override
     public Map<DBSetting, String> getConfiguration() {
