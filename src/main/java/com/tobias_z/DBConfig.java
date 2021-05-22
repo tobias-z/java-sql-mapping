@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface DBConfig {
 
-    Map<String, String> getConfiguration();
+    Map<DBSetting, String> getConfiguration();
 
 }

@@ -1,5 +1,6 @@
 package com.tobias_z.api.insert;
 
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.api.ResultSetMapper;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import java.lang.reflect.InvocationTargetException;
@@ -26,7 +27,7 @@ public class Insert {
         statement.executeUpdate();
     }
 
-    public <T> LinkedHashMap<String, Integer> withGeneratedKey(Class<T> dbTableClass)
+    public <T> Pair<String, Integer> withGeneratedKey(Class<T> dbTableClass)
         throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoGeneratedKeyFound {
         PreparedStatement statement = connection.prepareStatement(
             query,

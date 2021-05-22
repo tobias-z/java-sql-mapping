@@ -1,7 +1,9 @@
 package com.tobias_z.api;
 
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.DBConfig;
 import com.tobias_z.DBConnection;
+import com.tobias_z.DBSetting;
 import com.tobias_z.Database;
 import com.tobias_z.Inserted;
 import com.tobias_z.SQLQuery;
@@ -31,17 +33,17 @@ public class DatabaseRepository implements Database {
     public DatabaseRepository(DBConfig config) {
         this.config = config;
         try {
-            Class.forName(config.getConfiguration().get("jdbc-driver"));
+            Class.forName(config.getConfiguration().get(DBSetting.JDBC_DRIVER));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("jdbc-driver not found: " + e.getMessage());
         }
     }
 
     private Connection getConnection() throws SQLException {
-        Map<String, String> dbConfiguration = config.getConfiguration();
-        String user = dbConfiguration.get("user");
-        String password = dbConfiguration.getOrDefault("password", null);
-        String url = dbConfiguration.get("url");
+        Map<DBSetting, String> dbConfiguration = config.getConfiguration();
+        String user = dbConfiguration.get(DBSetting.USER);
+        String password = dbConfiguration.getOrDefault(DBSetting.PASSWORD, null);
+        String url = dbConfiguration.get(DBSetting.URL);
         return DriverManager.getConnection(url, user, password);
     }
 
@@ -84,12 +86,11 @@ public class DatabaseRepository implements Database {
         try (Connection connection = getConnection()) {
             generateFullSQLStatement(query);
             Insert insert = new Insert(connection, query.getSql());
-            LinkedHashMap<String, Integer> keyAndValues = insert.withGeneratedKey(dbTableClass);
+            Pair<String, Integer> keyAndValue = insert.withGeneratedKey(dbTableClass);
             return () -> {
                 Table table = getTableAnnotation(dbTableClass);
-                Entry<String, Integer> keyAndValue = keyAndValues.entrySet().iterator().next();
-                int id = keyAndValue.getValue();
-                String fieldName = keyAndValue.getKey();
+                String fieldName = keyAndValue.left;
+                int id = keyAndValue.right;
 
                 try (Connection conn = getConnection()) {
                     var ps = conn.prepareStatement(
@@ -172,7 +173,7 @@ public class DatabaseRepository implements Database {
             List<User> users2 = db.select(allQuery, User.class);
 
             SQLQuery insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
-                .addParameter("name", "Bob Martin Jjjj");
+                .addParameter("name", "Bob Martin Jjjjkk");
             User user = db.insert(
                 insertUserQuery,
                 User.class

@@ -1,5 +1,6 @@
 package com.tobias_z.api;
 
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
@@ -45,7 +46,7 @@ public class ResultSetMapper<T> {
         return tList;
     }
 
-    public LinkedHashMap<String, Integer> getGeneratedKeyAndFieldName(Class<T> clazz, ResultSet resultSet)
+    public Pair<String, Integer> getGeneratedKeyAndFieldName(Class<T> clazz, ResultSet resultSet)
         throws SQLException, NoGeneratedKeyFound {
         if (resultSet.next()) {
             Field[] fields = clazz.getDeclaredFields();
@@ -54,9 +55,7 @@ public class ResultSetMapper<T> {
                 Column column = field.getAnnotation(Column.class);
                 if (key != null && column != null) {
                     int id = resultSet.getInt(1);
-                    LinkedHashMap<String, Integer> keyAndName = new LinkedHashMap<>();
-                    keyAndName.put(column.name(), id);
-                    return keyAndName;
+                    return new Pair<>(column.name(), id);
                 }
             }
         }
