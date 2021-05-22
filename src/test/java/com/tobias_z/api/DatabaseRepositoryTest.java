@@ -15,6 +15,7 @@ import com.tobias_z.entities.NoIncrement;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
 import java.util.List;
+import org.apache.ibatis.jdbc.SQL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,6 +30,12 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         DBConfig dbConfig = new MySQLConfig();
         DB = new DatabaseRepository(dbConfig);
         runTestDatabaseMigration(dbConfig);
+    }
+
+    @Test
+    @DisplayName("database is up and running")
+    void databaseIsUpAndRunning() {
+        assertNotNull(DB);
     }
 
     @Nested
@@ -148,14 +155,57 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         }
 
         @Test
-        @DisplayName("should return a list of increments")
-        void shouldReturnAListOfIncrements() throws Exception {
+        @DisplayName("should return a list of no increments")
+        void shouldReturnAListOfNoIncrements() throws Exception {
             List<NoIncrement> noIncrements = DB.getAll(NoIncrement.class);
             assertEquals(1, noIncrements.size());
         }
 
     }
 
+    @Nested
+    @DisplayName("select")
+    class Select {
+
+        SQLQuery insertUserQuery;
+        String username = "Tobias";
+
+        @BeforeEach
+        void setUp() throws Exception {
+            insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
+                .addParameter("name", username);
+            DB.insert(insertUserQuery);
+            DB.insert(insertUserQuery);
+            DB.insert(insertUserQuery);
+        }
+
+
+        @Test
+        @DisplayName("should return a list of users with from name")
+        void shouldReturnAListOfUsersWithFromName() throws Exception {
+            SQLQuery query = new SQLQuery("SELECT * FROM users WHERE name = :name")
+                .addParameter("name", username);
+            List<User> users = DB.select(query, User.class);
+            assertEquals(3, users.size());
+        }
+
+        @Test
+        @DisplayName("should throw exception if query fails")
+        void shouldThrowExceptionIfQueryFails() {
+            SQLQuery query = new SQLQuery("SELECT * FROM fails");
+            assertThrows(DatabaseException.class, () -> DB.select(query, NoIncrement.class));
+        }
+
+        @Test
+        @DisplayName("should return empty list of no increments when none exist")
+        void shouldReturnEmptyListOfNoIncrementsWhenNoneExist() throws Exception {
+            SQLQuery query = new SQLQuery("SELECT * FROM no_increment");
+            List<NoIncrement> noIncrements = DB.select(query, NoIncrement.class);
+            assertNotNull(noIncrements);
+            assertEquals(0, noIncrements.size());
+        }
+
+    }
 
 
 }
