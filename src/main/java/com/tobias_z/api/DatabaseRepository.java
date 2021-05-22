@@ -12,15 +12,12 @@ import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Table;
 import com.tobias_z.api.insert.Insert;
-import com.tobias_z.domain.NoIncrement;
-import com.tobias_z.domain.User;
 import com.tobias_z.exceptions.DatabaseException;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import com.tobias_z.exceptions.NoPrimaryKeyFound;
 import com.tobias_z.exceptions.NoTableFound;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -156,14 +153,24 @@ public class DatabaseRepository implements Database {
         }
     }
 
+    private <PrimaryKey> PrimaryKey getPrimaryKeyStringForSQL(PrimaryKey primaryKey) {
+        try {
+            Integer.parseInt(String.valueOf(primaryKey));
+        } catch (NumberFormatException e) {
+            primaryKey = (PrimaryKey) ("'" + primaryKey + "'");
+        }
+        return primaryKey;
+    }
+
     @Override
     public <T, PrimaryKey> T get(PrimaryKey primaryKey, Class<T> dbTableClass)
         throws DatabaseException, NoTableFound, NoGeneratedKeyFound {
         try (Connection connection = getConnection()) {
             Table table = getTableAnnotation(dbTableClass);
             Column column = getPrimaryKeyColumn(dbTableClass);
+            PrimaryKey foundPrimaryKey = getPrimaryKeyStringForSQL(primaryKey);
             var ps = connection.prepareStatement(
-                "SELECT * FROM " + table.name() + " WHERE " + column.name() + " = " + primaryKey
+                "SELECT * FROM " + table.name() + " WHERE " + column.name() + " = " + foundPrimaryKey
             );
             ResultSet resultSet = ps.executeQuery();
             ResultSetMapper<T> mapper = new ResultSetMapper<>();
@@ -196,34 +203,6 @@ public class DatabaseRepository implements Database {
             return mapper.mapListOfResults(dbTableClass, resultSet);
         } catch (SQLException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new DatabaseException(e.getMessage());
-        }
-    }
-
-    public static void main(String[] args) {
-        Database db = DBConnection.createConnection(new Config());
-        try {
-            List<User> users = db.getAll(User.class);
-
-            User user2 = db.get(1, User.class);
-
-            SQLQuery allQuery = new SQLQuery("SELECT * FROM users");
-            List<User> users2 = db.select(allQuery, User.class);
-
-//            SQLQuery insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
-//                .addParameter("name", "Bob Martin Jjjjkkkdd");
-//            User user = db.insert(
-//                insertUserQuery,
-//                User.class
-//            ).getGeneratedEntity();
-
-            SQLQuery insertNoIncrement = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
-                .addParameter("message", "This is a primary key 3");
-            ExecutedQuery<NoIncrement> executedQuery = db.insert(insertNoIncrement, NoIncrement.class);
-            NoIncrement noIncrement = executedQuery.getGeneratedEntity();
-            System.out.println(noIncrement);
-
-        } catch (DatabaseException | NoTableFound | NoGeneratedKeyFound | NoPrimaryKeyFound e) {
-            e.printStackTrace();
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.tobias_z.domain;
+package com.tobias_z.entities;
 
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.PrimaryKey;
