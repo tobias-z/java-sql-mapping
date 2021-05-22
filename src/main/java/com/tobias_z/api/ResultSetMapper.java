@@ -1,20 +1,17 @@
 package com.tobias_z.api;
 
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
-import com.tobias_z.annotations.AutoIncremented;
-import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
+import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
-public class ResultSetMapper<T> {
+class ResultSetMapper<T> {
 
     private T getOneResult(Class<T> clazz, ResultSet resultSet)
         throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, SQLException {

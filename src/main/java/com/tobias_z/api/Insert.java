@@ -1,4 +1,4 @@
-package com.tobias_z.api.insert;
+package com.tobias_z.api;
 
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.api.ResultSetMapper;
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class Insert {
+class Insert {
 
     private final Connection connection;
     private final String query;
