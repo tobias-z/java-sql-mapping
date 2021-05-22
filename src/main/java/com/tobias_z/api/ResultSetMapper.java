@@ -1,11 +1,13 @@
 package com.tobias_z.api;
 
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+import com.tobias_z.annotations.AutoIncremented;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ public class ResultSetMapper<T> {
         return tList;
     }
 
-    public Pair<String, Integer> getGeneratedKeyAndFieldName(Class<T> clazz, ResultSet resultSet)
+    public Pair<String, Object> getPrimaryKeyAndFieldName(Class<T> clazz, ResultSet resultSet)
         throws SQLException, NoGeneratedKeyFound {
         if (resultSet.next()) {
             Field[] fields = clazz.getDeclaredFields();

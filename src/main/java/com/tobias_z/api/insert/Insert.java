@@ -9,8 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class Insert {
 
@@ -27,7 +25,7 @@ public class Insert {
         statement.executeUpdate();
     }
 
-    public <T> Pair<String, Integer> withGeneratedKey(Class<T> dbTableClass)
+    public <T> Pair<String, Object> withGeneratedKey(Class<T> dbTableClass)
         throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoGeneratedKeyFound {
         PreparedStatement statement = connection.prepareStatement(
             query,
@@ -36,6 +34,6 @@ public class Insert {
         statement.executeUpdate();
         ResultSet resultSet = statement.getGeneratedKeys();
         ResultSetMapper<T> mapper = new ResultSetMapper<>();
-        return mapper.getGeneratedKeyAndFieldName(dbTableClass, resultSet);
+        return mapper.getPrimaryKeyAndFieldName(dbTableClass, resultSet);
     }
 }

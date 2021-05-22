@@ -1,5 +1,6 @@
 package com.tobias_z.domain;
 
+import com.tobias_z.annotations.AutoIncremented;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.Table;
@@ -7,6 +8,7 @@ import com.tobias_z.annotations.Table;
 @Table(name = "users")
 public class User {
 
+    @AutoIncremented
     @PrimaryKey
     @Column(name = "id")
     private Integer id;

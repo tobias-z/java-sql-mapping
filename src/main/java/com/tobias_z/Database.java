@@ -2,13 +2,14 @@ package com.tobias_z;
 
 import com.tobias_z.exceptions.DatabaseException;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
+import com.tobias_z.exceptions.NoPrimaryKeyFound;
 import com.tobias_z.exceptions.NoTableFound;
 import java.util.List;
 
 public interface Database {
 
-    <T> Inserted<T> insert(SQLQuery query, Class<T> dbTableClass)
-        throws DatabaseException, NoGeneratedKeyFound;
+    <T> ExecutedQuery<T> insert(SQLQuery query, Class<T> dbTableClass)
+        throws DatabaseException, NoGeneratedKeyFound, NoPrimaryKeyFound;
 
     void insert(SQLQuery query) throws DatabaseException;
 

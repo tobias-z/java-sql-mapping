@@ -5,26 +5,28 @@ import com.tobias_z.DBConfig;
 import com.tobias_z.DBConnection;
 import com.tobias_z.DBSetting;
 import com.tobias_z.Database;
-import com.tobias_z.Inserted;
+import com.tobias_z.ExecutedQuery;
 import com.tobias_z.SQLQuery;
+import com.tobias_z.annotations.AutoIncremented;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Table;
 import com.tobias_z.api.insert.Insert;
+import com.tobias_z.domain.NoIncrement;
 import com.tobias_z.domain.User;
 import com.tobias_z.exceptions.DatabaseException;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
+import com.tobias_z.exceptions.NoPrimaryKeyFound;
 import com.tobias_z.exceptions.NoTableFound;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class DatabaseRepository implements Database {
 
@@ -80,22 +82,57 @@ public class DatabaseRepository implements Database {
         throw new NoGeneratedKeyFound("No PrimaryKey annotation was found on: " + dbTableClass.getName());
     }
 
+    private <T> boolean isWithGeneratedKey(Class<T> dbTableClass) {
+        Field[] fields = dbTableClass.getDeclaredFields();
+        for (Field field : fields) {
+            AutoIncremented autoIncremented = field.getAnnotation(AutoIncremented.class);
+            if (autoIncremented != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private <T> Pair<String, Object> getPrimaryKeyAndValue(Class<T> dbTableClass, SQLQuery query)
+        throws NoPrimaryKeyFound {
+        Field[] fields = dbTableClass.getDeclaredFields();
+        for (Field field : fields) {
+            PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
+            if (primaryKey != null) {
+                String key = field.getAnnotation(Column.class).name();
+                Object value = query.getParameters().get(key);
+                try {
+                    Integer.parseInt(String.valueOf(value));
+                } catch (NumberFormatException e) {
+                    value = "'" + value + "'";
+                }
+                return new Pair<>(key, value);
+            }
+        }
+        throw new NoPrimaryKeyFound("Did not find a a primary key on class: " + dbTableClass.getName());
+    }
+
     @Override
-    public <T> Inserted<T> insert(SQLQuery query, Class<T> dbTableClass)
-        throws DatabaseException, NoGeneratedKeyFound {
+    public <T> ExecutedQuery<T> insert(SQLQuery query, Class<T> dbTableClass)
+        throws DatabaseException, NoGeneratedKeyFound, NoPrimaryKeyFound {
         try (Connection connection = getConnection()) {
             generateFullSQLStatement(query);
+            Pair<String, Object> keyAndValue;
             Insert insert = new Insert(connection, query.getSql());
-            Pair<String, Integer> keyAndValue = insert.withGeneratedKey(dbTableClass);
+            if (isWithGeneratedKey(dbTableClass)) {
+                keyAndValue = insert.withGeneratedKey(dbTableClass);
+            } else {
+                insert.withoutGeneratedKey();
+                keyAndValue = getPrimaryKeyAndValue(dbTableClass, query);
+            }
             return () -> {
                 Table table = getTableAnnotation(dbTableClass);
                 String fieldName = keyAndValue.left;
-                int id = keyAndValue.right;
+                Object value = keyAndValue.right;
 
                 try (Connection conn = getConnection()) {
                     var ps = conn.prepareStatement(
-                        "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = ?;");
-                    ps.setInt(1, id);
+                        "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = " + value);
                     ResultSet resultSet = ps.executeQuery();
                     ResultSetMapper<T> mapper = new ResultSetMapper<>();
                     return mapper.mapSingleResult(dbTableClass, resultSet);
@@ -172,13 +209,20 @@ public class DatabaseRepository implements Database {
             SQLQuery allQuery = new SQLQuery("SELECT * FROM users");
             List<User> users2 = db.select(allQuery, User.class);
 
-            SQLQuery insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
-                .addParameter("name", "Bob Martin Jjjjkk");
-            User user = db.insert(
-                insertUserQuery,
-                User.class
-            ).getGeneratedEntity();
-        } catch (DatabaseException | NoTableFound | NoGeneratedKeyFound e) {
+//            SQLQuery insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
+//                .addParameter("name", "Bob Martin Jjjjkkkdd");
+//            User user = db.insert(
+//                insertUserQuery,
+//                User.class
+//            ).getGeneratedEntity();
+
+            SQLQuery insertNoIncrement = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
+                .addParameter("message", "This is a primary key 3");
+            ExecutedQuery<NoIncrement> executedQuery = db.insert(insertNoIncrement, NoIncrement.class);
+            NoIncrement noIncrement = executedQuery.getGeneratedEntity();
+            System.out.println(noIncrement);
+
+        } catch (DatabaseException | NoTableFound | NoGeneratedKeyFound | NoPrimaryKeyFound e) {
             e.printStackTrace();
         }
     }
