@@ -13,16 +13,17 @@ import org.apache.ibatis.jdbc.ScriptRunner;
 
 public class SetupIntegrationTests {
 
-    public void runTestDatabaseMigration(DBConfig dbConfig) {
+    public void runTestDatabaseMigration(DBConfig dbConfig, String migrateFile) {
         Map<DBSetting, String> settings = dbConfig.getConfiguration();
         String TEST_DB_URL = settings.get(DBSetting.URL);
         String USER = settings.get(DBSetting.USER);
         String PASS = settings.getOrDefault(DBSetting.PASSWORD, null);
 
-        InputStream stream = SetupIntegrationTests.class.getClassLoader().getResourceAsStream("testinit.sql");
+        InputStream stream = SetupIntegrationTests.class.getClassLoader().getResourceAsStream(
+            migrateFile);
         if (stream == null) {
             System.out.println("Migration file, does not exist: ");
-            throw new RuntimeException("testinit.sql");
+            throw new RuntimeException(migrateFile);
         }
         try (Connection conn = DriverManager.getConnection(TEST_DB_URL, USER, PASS)) {
             conn.setAutoCommit(false);

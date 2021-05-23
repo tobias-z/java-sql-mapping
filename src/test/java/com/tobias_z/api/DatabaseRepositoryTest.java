@@ -14,8 +14,6 @@ import com.tobias_z.entities.NoIncrement;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
 import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,22 +28,22 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
 
     private static Database DB;
 
-    private void setupTest(DBConfig dbConfig, VoidFunction func) throws Exception {
+    private void setupTest(DBConfig dbConfig, VoidFunction func, String migrateFile) throws Exception {
         DB = new DatabaseRepository(dbConfig);
-        runTestDatabaseMigration(dbConfig);
+        runTestDatabaseMigration(dbConfig, migrateFile);
         func.apply();
     }
 
-    private void setupTest(DBConfig dbConfig) {
+    private void setupTest(DBConfig dbConfig, String migrateFile) {
         DB = new DatabaseRepository(dbConfig);
-        runTestDatabaseMigration(dbConfig);
+        runTestDatabaseMigration(dbConfig, migrateFile);
     }
 
     @DisplayName("database is up and running")
     @ParameterizedTest(name = "{1}")
     @ArgumentsSource(DBConfigArgumentProvider.class)
-    void databaseIsUpAndRunning(DBConfig dbConfig, String dbName) {
-        setupTest(dbConfig);
+    void databaseIsUpAndRunning(DBConfig dbConfig, String dbName, String migrateFile) {
+        setupTest(dbConfig, migrateFile);
         assertNotNull(DB);
     }
 
@@ -63,17 +61,18 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @DisplayName("should return a user from the auto incremented primary key")
         @ArgumentsSource(DBConfigArgumentProvider.class)
-        void shouldNotThrowException(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldNotThrowException(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             assertDoesNotThrow(() -> DB.insert(insertUserQuery));
         }
 
         @DisplayName("should return a user from the auto incremented primary key")
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
-        void shouldReturnAUserFromTheAutoIncrementedPrimaryKey(DBConfig dbConfig, String dbName)
+        void shouldReturnAUserFromTheAutoIncrementedPrimaryKey(DBConfig dbConfig, String dbName,
+            String migrateFile)
             throws Exception {
-            setupTest(dbConfig, beforeEach);
+            setupTest(dbConfig, beforeEach, migrateFile);
             User user = DB.insert(insertUserQuery, User.class);
             assertEquals(username, user.getName());
             assertNotNull(user.getId());
@@ -82,9 +81,10 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a NoIncrement with no auto incremented primary key")
-        void shouldReturnANoIncrementWithNoAutoIncrementedPrimaryKey(DBConfig dbConfig, String dbName)
+        void shouldReturnANoIncrementWithNoAutoIncrementedPrimaryKey(DBConfig dbConfig, String dbName,
+            String migrateFile)
             throws Exception {
-            setupTest(dbConfig, beforeEach);
+            setupTest(dbConfig, beforeEach, migrateFile);
             NoIncrement noIncrement = DB.insert(insertNoIncrementQuery, NoIncrement.class);
             assertEquals(message, noIncrement.getMessage());
         }
@@ -92,9 +92,10 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should throw exception if primary key already exists")
-        void shouldThrowExceptionIfPrimaryKeyAlreadyExists(DBConfig dbConfig, String dbName)
+        void shouldThrowExceptionIfPrimaryKeyAlreadyExists(DBConfig dbConfig, String dbName,
+            String migrateFile)
             throws Exception {
-            setupTest(dbConfig, beforeEach);
+            setupTest(dbConfig, beforeEach, migrateFile);
             DB.insert(insertNoIncrementQuery);
             assertThrows(DatabaseException.class, () -> DB.insert(insertNoIncrementQuery));
         }
@@ -119,8 +120,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a user")
-        void shouldReturnAUser(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldReturnAUser(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             User foundUser = DB.get(user.getId(), User.class);
             assertEquals(user.getId(), foundUser.getId());
             assertEquals(user.getName(), foundUser.getName());
@@ -129,16 +130,16 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should throw exception if incorrect primary key")
-        void shouldThrowExceptionIfIncorrectPrimaryKey(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldThrowExceptionIfIncorrectPrimaryKey(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             assertThrows(DatabaseException.class, () -> DB.get(10, User.class));
         }
 
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a NoIncrement")
-        void shouldReturnANoIncrement(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldReturnANoIncrement(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             NoIncrement noIncrement = DB.get(message, NoIncrement.class);
             assertEquals(message, noIncrement.getMessage());
         }
@@ -163,8 +164,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a list of users")
-        void shouldReturnAListOfUsers(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldReturnAListOfUsers(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             List<User> users = DB.getAll(User.class);
             assertEquals(3, users.size());
         }
@@ -172,8 +173,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a list of no increments")
-        void shouldReturnAListOfNoIncrements(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldReturnAListOfNoIncrements(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             List<NoIncrement> noIncrements = DB.getAll(NoIncrement.class);
             assertEquals(1, noIncrements.size());
         }
@@ -195,8 +196,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a list of users with from name")
-        void shouldReturnAListOfUsersWithFromName(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldReturnAListOfUsersWithFromName(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             SQLQuery query = new SQLQuery("SELECT * FROM users WHERE name = :name")
                 .addParameter("name", username);
             List<User> users = DB.select(query, User.class);
@@ -206,8 +207,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should throw exception if query fails")
-        void shouldThrowExceptionIfQueryFails(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldThrowExceptionIfQueryFails(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             SQLQuery query = new SQLQuery("SELECT * FROM fails");
             assertThrows(DatabaseException.class, () -> DB.select(query, NoIncrement.class));
         }
@@ -215,9 +216,9 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return empty list of no increments when none exist")
-        void shouldReturnEmptyListOfNoIncrementsWhenNoneExist(DBConfig dbConfig, String dbName)
+        void shouldReturnEmptyListOfNoIncrementsWhenNoneExist(DBConfig dbConfig, String dbName, String migrateFile)
             throws Exception {
-            setupTest(dbConfig, beforeEach);
+            setupTest(dbConfig, beforeEach, migrateFile);
             SQLQuery query = new SQLQuery("SELECT * FROM no_increment");
             List<NoIncrement> noIncrements = DB.select(query, NoIncrement.class);
             assertNotNull(noIncrements);
@@ -259,8 +260,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should update a users name to a different value")
-        void shouldUpdateAUsersNameToADifferentValue(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldUpdateAUsersNameToADifferentValue(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             User updatedUser = DB.update(updateUserQuery, User.class);
             assertEquals(user.getId(), updatedUser.getId());
             assertEquals(newName, updatedUser.getName());
@@ -269,25 +270,25 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not throw exception when updating user")
-        void shouldNotThrowExceptionWhenUpdatingUser(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldNotThrowExceptionWhenUpdatingUser(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             assertDoesNotThrow(() -> DB.update(updateUserQuery));
         }
 
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not throw exception when updating no increment")
-        void shouldNotThrowExceptionWhenUpdatingNoIncrement(DBConfig dbConfig, String dbName)
+        void shouldNotThrowExceptionWhenUpdatingNoIncrement(DBConfig dbConfig, String dbName, String migrateFile)
             throws Exception {
-            setupTest(dbConfig, beforeEach);
+            setupTest(dbConfig, beforeEach, migrateFile);
             assertDoesNotThrow(() -> DB.update(updateNoIncrementQuery));
         }
 
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should be able to update primary key of string")
-        void shouldBeAbleToUpdatePrimaryKeyOfString(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldBeAbleToUpdatePrimaryKeyOfString(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             NoIncrement updatedNoIncrement = DB.update(updateNoIncrementQuery, NoIncrement.class);
             assertEquals(newMessage, updatedNoIncrement.getMessage());
             assertNotEquals(message, updatedNoIncrement.getMessage());
@@ -315,16 +316,16 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not throw when deleting user")
-        void shouldNotThrowWhenDeletingUser(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldNotThrowWhenDeletingUser(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             assertDoesNotThrow(() -> DB.delete(user.getId(), User.class));
         }
 
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not be able to find user when deleted")
-        void shouldNotBeAbleToFindUserWhenDeleted(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldNotBeAbleToFindUserWhenDeleted(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             DB.delete(user.getId(), User.class);
             assertThrows(DatabaseException.class, () -> DB.get(user.getId(), User.class));
         }
@@ -332,8 +333,8 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @ParameterizedTest(name = "{1}")
         @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should delete user with SQL query")
-        void shouldDeleteUserWithSqlQuery(DBConfig dbConfig, String dbName) throws Exception {
-            setupTest(dbConfig, beforeEach);
+        void shouldDeleteUserWithSqlQuery(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+            setupTest(dbConfig, beforeEach, migrateFile);
             SQLQuery deleteUserQuery = new SQLQuery("DELETE FROM users WHERE id = :id")
                 .addParameter("id", user.getId());
             assertDoesNotThrow(() -> DB.delete(deleteUserQuery));
