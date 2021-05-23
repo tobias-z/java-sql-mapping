@@ -5,36 +5,47 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
 import com.tobias_z.SQLQuery;
-import com.tobias_z.api.connection.MySQLTestDBConfig;
 import com.tobias_z.api.connection.SetupIntegrationTests;
 import com.tobias_z.entities.NoIncrement;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 class DatabaseRepositoryTest extends SetupIntegrationTests {
 
+    SQLQuery insertUserQuery;
+    SQLQuery insertNoIncrementQuery;
+    String username = "Bob";
+    String message = "Hello Bob";
+
     private static Database DB;
 
-    @BeforeEach
-    void setUp() {
-        DBConfig dbConfig = new MySQLTestDBConfig();
+    private void setupTest(DBConfig dbConfig, VoidFunction func) throws Exception {
+        DB = new DatabaseRepository(dbConfig);
+        runTestDatabaseMigration(dbConfig);
+        func.apply();
+    }
+
+    private void setupTest(DBConfig dbConfig) {
         DB = new DatabaseRepository(dbConfig);
         runTestDatabaseMigration(dbConfig);
     }
 
-    @Test
     @DisplayName("database is up and running")
-    void databaseIsUpAndRunning() {
+    @ParameterizedTest(name = "{1}")
+    @ArgumentsSource(DBConfigArgumentProvider.class)
+    void databaseIsUpAndRunning(DBConfig dbConfig, String dbName) {
+        setupTest(dbConfig);
         assertNotNull(DB);
     }
 
@@ -42,43 +53,48 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
     @DisplayName("insert")
     class Insert {
 
-        SQLQuery insertUserQuery;
-        SQLQuery insertNoIncrementQuery;
-        String username = "Bob";
-        String message = "Hello Bob";
-
-        @BeforeEach
-        void setUp() {
+        private final VoidFunction beforeEach = () -> {
             insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", username);
             insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
                 .addParameter("message", message);
-        }
+        };
 
-        @Test
-        @DisplayName("should not throw exception")
-        void shouldNotThrowException() throws Exception {
+        @ParameterizedTest(name = "{1}")
+        @DisplayName("should return a user from the auto incremented primary key")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
+        void shouldNotThrowException(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             assertDoesNotThrow(() -> DB.insert(insertUserQuery));
         }
 
-        @Test
         @DisplayName("should return a user from the auto incremented primary key")
-        void shouldReturnAUserFromTheAutoIncrementedPrimaryKey() throws Exception {
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
+        void shouldReturnAUserFromTheAutoIncrementedPrimaryKey(DBConfig dbConfig, String dbName)
+            throws Exception {
+            setupTest(dbConfig, beforeEach);
             User user = DB.insert(insertUserQuery, User.class);
             assertEquals(username, user.getName());
             assertNotNull(user.getId());
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a NoIncrement with no auto incremented primary key")
-        void shouldReturnANoIncrementWithNoAutoIncrementedPrimaryKey() throws Exception {
+        void shouldReturnANoIncrementWithNoAutoIncrementedPrimaryKey(DBConfig dbConfig, String dbName)
+            throws Exception {
+            setupTest(dbConfig, beforeEach);
             NoIncrement noIncrement = DB.insert(insertNoIncrementQuery, NoIncrement.class);
             assertEquals(message, noIncrement.getMessage());
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should throw exception if primary key already exists")
-        void shouldThrowExceptionIfPrimaryKeyAlreadyExists() throws Exception {
+        void shouldThrowExceptionIfPrimaryKeyAlreadyExists(DBConfig dbConfig, String dbName)
+            throws Exception {
+            setupTest(dbConfig, beforeEach);
             DB.insert(insertNoIncrementQuery);
             assertThrows(DatabaseException.class, () -> DB.insert(insertNoIncrementQuery));
         }
@@ -88,38 +104,41 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
     @Nested
     @DisplayName("get")
     class Get {
-        SQLQuery insertUserQuery;
-        SQLQuery insertNoIncrementQuery;
-        String username = "Bob";
-        String message = "Hello Bob";
 
-        @BeforeEach
-        void setUp() throws Exception {
+        User user;
+
+        private final VoidFunction beforeEach = () -> {
             insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", username);
             insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
                 .addParameter("message", message);
-            DB.insert(insertUserQuery);
+            user = DB.insert(insertUserQuery, User.class);
             DB.insert(insertNoIncrementQuery);
-        }
+        };
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a user")
-        void shouldReturnAUser() throws Exception {
-            User user = DB.get(1, User.class);
-            assertEquals(1, user.getId());
-            assertEquals(username, user.getName());
+        void shouldReturnAUser(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
+            User foundUser = DB.get(user.getId(), User.class);
+            assertEquals(user.getId(), foundUser.getId());
+            assertEquals(user.getName(), foundUser.getName());
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should throw exception if incorrect primary key")
-        void shouldThrowExceptionIfIncorrectPrimaryKey() {
+        void shouldThrowExceptionIfIncorrectPrimaryKey(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             assertThrows(DatabaseException.class, () -> DB.get(10, User.class));
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a NoIncrement")
-        void shouldReturnANoIncrement() throws Exception {
+        void shouldReturnANoIncrement(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             NoIncrement noIncrement = DB.get(message, NoIncrement.class);
             assertEquals(message, noIncrement.getMessage());
         }
@@ -130,13 +149,7 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
     @DisplayName("get all")
     class GetAll {
 
-        SQLQuery insertUserQuery;
-        SQLQuery insertNoIncrementQuery;
-        String username = "Bob";
-        String message = "Hello Bob";
-
-        @BeforeEach
-        void setUp() throws Exception {
+        private final VoidFunction beforeEach = () -> {
             insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", username);
             insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
@@ -145,18 +158,22 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
             DB.insert(insertUserQuery);
             DB.insert(insertUserQuery);
             DB.insert(insertNoIncrementQuery);
-        }
+        };
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a list of users")
-        void shouldReturnAListOfUsers() throws Exception {
+        void shouldReturnAListOfUsers(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             List<User> users = DB.getAll(User.class);
             assertEquals(3, users.size());
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a list of no increments")
-        void shouldReturnAListOfNoIncrements() throws Exception {
+        void shouldReturnAListOfNoIncrements(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             List<NoIncrement> noIncrements = DB.getAll(NoIncrement.class);
             assertEquals(1, noIncrements.size());
         }
@@ -167,38 +184,40 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
     @DisplayName("select")
     class Select {
 
-        SQLQuery insertUserQuery;
-        String username = "Tobias";
-
-        @BeforeEach
-        void setUp() throws Exception {
+        private final VoidFunction beforeEach = () -> {
             insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", username);
             DB.insert(insertUserQuery);
             DB.insert(insertUserQuery);
             DB.insert(insertUserQuery);
-        }
+        };
 
-
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return a list of users with from name")
-        void shouldReturnAListOfUsersWithFromName() throws Exception {
+        void shouldReturnAListOfUsersWithFromName(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             SQLQuery query = new SQLQuery("SELECT * FROM users WHERE name = :name")
                 .addParameter("name", username);
             List<User> users = DB.select(query, User.class);
             assertEquals(3, users.size());
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should throw exception if query fails")
-        void shouldThrowExceptionIfQueryFails() {
+        void shouldThrowExceptionIfQueryFails(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             SQLQuery query = new SQLQuery("SELECT * FROM fails");
             assertThrows(DatabaseException.class, () -> DB.select(query, NoIncrement.class));
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should return empty list of no increments when none exist")
-        void shouldReturnEmptyListOfNoIncrementsWhenNoneExist() throws Exception {
+        void shouldReturnEmptyListOfNoIncrementsWhenNoneExist(DBConfig dbConfig, String dbName)
+            throws Exception {
+            setupTest(dbConfig, beforeEach);
             SQLQuery query = new SQLQuery("SELECT * FROM no_increment");
             List<NoIncrement> noIncrements = DB.select(query, NoIncrement.class);
             assertNotNull(noIncrements);
@@ -211,20 +230,15 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
     @DisplayName("update")
     class Update {
 
-        SQLQuery insertUserQuery;
-        SQLQuery insertNoIncrementQuery;
         SQLQuery updateUserQuery;
         SQLQuery updateNoIncrementQuery;
 
-        String username = "Bob";
-        String message = "Hello Bob";
         String newName = "Updated Bob";
         String newMessage = "This is an updated message";
 
         User user;
 
-        @BeforeEach
-        void setUp() throws Exception {
+        private final VoidFunction beforeEach = () -> {
             insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", username);
             insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
@@ -236,34 +250,44 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
             updateUserQuery = new SQLQuery("UPDATE users SET name = :name WHERE id = :id")
                 .addParameter("name", newName)
                 .addParameter("id", user.getId());
-            updateNoIncrementQuery = new SQLQuery("UPDATE no_increment SET message = :newMessage WHERE message = :message")
+            updateNoIncrementQuery = new SQLQuery(
+                "UPDATE no_increment SET message = :newMessage WHERE message = :message")
                 .addParameter("newMessage", newMessage)
                 .addParameter("message", message);
-        }
+        };
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should update a users name to a different value")
-        void shouldUpdateAUsersNameToADifferentValue() throws Exception {
+        void shouldUpdateAUsersNameToADifferentValue(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             User updatedUser = DB.update(updateUserQuery, User.class);
             assertEquals(user.getId(), updatedUser.getId());
             assertEquals(newName, updatedUser.getName());
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not throw exception when updating user")
-        void shouldNotThrowExceptionWhenUpdatingUser() {
+        void shouldNotThrowExceptionWhenUpdatingUser(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             assertDoesNotThrow(() -> DB.update(updateUserQuery));
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not throw exception when updating no increment")
-        void shouldNotThrowExceptionWhenUpdatingNoIncrement() {
+        void shouldNotThrowExceptionWhenUpdatingNoIncrement(DBConfig dbConfig, String dbName)
+            throws Exception {
+            setupTest(dbConfig, beforeEach);
             assertDoesNotThrow(() -> DB.update(updateNoIncrementQuery));
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should be able to update primary key of string")
-        void shouldBeAbleToUpdatePrimaryKeyOfString() throws Exception {
+        void shouldBeAbleToUpdatePrimaryKeyOfString(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             NoIncrement updatedNoIncrement = DB.update(updateNoIncrementQuery, NoIncrement.class);
             assertEquals(newMessage, updatedNoIncrement.getMessage());
             assertNotEquals(message, updatedNoIncrement.getMessage());
@@ -275,15 +299,9 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
     @DisplayName("delete")
     class Delete {
 
-        SQLQuery insertUserQuery;
-        SQLQuery insertNoIncrementQuery;
-        String username = "Bob";
-        String message = "Hello Bob";
-
         User user;
 
-        @BeforeEach
-        void setUp() throws Exception {
+        private final VoidFunction beforeEach = () -> {
             insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
                 .addParameter("name", username);
             insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
@@ -292,24 +310,30 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
             DB.insert(insertUserQuery);
             DB.insert(insertUserQuery);
             DB.insert(insertNoIncrementQuery);
-        }
+        };
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not throw when deleting user")
-        void shouldNotThrowWhenDeletingUser() {
+        void shouldNotThrowWhenDeletingUser(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             assertDoesNotThrow(() -> DB.delete(user.getId(), User.class));
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should not be able to find user when deleted")
-        void shouldNotBeAbleToFindUserWhenDeleted() throws Exception {
+        void shouldNotBeAbleToFindUserWhenDeleted(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             DB.delete(user.getId(), User.class);
             assertThrows(DatabaseException.class, () -> DB.get(user.getId(), User.class));
         }
 
-        @Test
+        @ParameterizedTest(name = "{1}")
+        @ArgumentsSource(DBConfigArgumentProvider.class)
         @DisplayName("should delete user with SQL query")
-        void shouldDeleteUserWithSqlQuery() {
+        void shouldDeleteUserWithSqlQuery(DBConfig dbConfig, String dbName) throws Exception {
+            setupTest(dbConfig, beforeEach);
             SQLQuery deleteUserQuery = new SQLQuery("DELETE FROM users WHERE id = :id")
                 .addParameter("id", user.getId());
             assertDoesNotThrow(() -> DB.delete(deleteUserQuery));
