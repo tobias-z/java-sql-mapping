@@ -182,6 +182,17 @@ public class DatabaseRepository implements Database {
     }
 
     @Override
+    public void delete(SQLQuery query) throws DatabaseException {
+        try (Connection connection = getConnection()) {
+            generateFullSQLStatement(query);
+            PreparedStatement statement = connection.prepareStatement(query.getSql());
+            statement.execute();
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    @Override
     public <T> List<T> getAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound {
         try (Connection connection = getConnection()) {
             Table table = utils.getTableAnnotation(dbTableClass);

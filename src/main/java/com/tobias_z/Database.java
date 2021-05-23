@@ -28,5 +28,7 @@ public interface Database {
 
     <T, PrimaryKey> void delete(PrimaryKey primaryKey, Class<T> dbTableClass) throws DatabaseException;
 
+    void delete(SQLQuery query) throws DatabaseException;
+
 
 }

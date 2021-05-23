@@ -307,6 +307,14 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
             assertThrows(DatabaseException.class, () -> DB.get(user.getId(), User.class));
         }
 
+        @Test
+        @DisplayName("should delete user with SQL query")
+        void shouldDeleteUserWithSqlQuery() {
+            SQLQuery deleteUserQuery = new SQLQuery("DELETE FROM users WHERE id = :id")
+                .addParameter("id", user.getId());
+            assertDoesNotThrow(() -> DB.delete(deleteUserQuery));
+        }
+
     }
 
 
