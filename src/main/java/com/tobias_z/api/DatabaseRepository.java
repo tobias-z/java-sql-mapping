@@ -15,6 +15,7 @@ import com.tobias_z.exceptions.NoTableFound;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -56,9 +57,28 @@ public class DatabaseRepository implements Database {
             });
     }
 
+    private SQLQuery getSavedQuery(SQLQuery query) {
+        SQLQuery savedQuery = new SQLQuery(query.getSql());
+        query.getParameters().forEach(savedQuery::addParameter);
+        return savedQuery;
+    }
+
+    private <T> T getByPrimaryKey(Class<T> dbTableClass, Pair<String, Object> keyAndValue, Connection connection)
+        throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Table table = utils.getTableAnnotation(dbTableClass);
+        String fieldName = keyAndValue.left;
+        Object value = keyAndValue.right;
+
+        var ps = connection.prepareStatement(
+            "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = " + value);
+        ResultSet resultSet = ps.executeQuery();
+        ResultSetMapper<T> mapper = new ResultSetMapper<>();
+        return mapper.mapSingleResult(dbTableClass, resultSet);
+    }
+
     @Override
-    public <T> ExecutedQuery<T> insert(SQLQuery query, Class<T> dbTableClass)
-        throws DatabaseException, NoGeneratedKeyFound, NoPrimaryKeyFound {
+    public <T> T insert(SQLQuery query, Class<T> dbTableClass)
+        throws DatabaseException, NoGeneratedKeyFound, NoPrimaryKeyFound, NoTableFound {
         try (Connection connection = getConnection()) {
             generateFullSQLStatement(query);
             Pair<String, Object> keyAndValue;
@@ -69,21 +89,7 @@ public class DatabaseRepository implements Database {
                 insert.withoutGeneratedKey();
                 keyAndValue = utils.getPrimaryKeyAndValue(dbTableClass, query);
             }
-            return () -> {
-                Table table = utils.getTableAnnotation(dbTableClass);
-                String fieldName = keyAndValue.left;
-                Object value = keyAndValue.right;
-
-                try (Connection conn = getConnection()) {
-                    var ps = conn.prepareStatement(
-                        "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = " + value);
-                    ResultSet resultSet = ps.executeQuery();
-                    ResultSetMapper<T> mapper = new ResultSetMapper<>();
-                    return mapper.mapSingleResult(dbTableClass, resultSet);
-                } catch (SQLException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-                    throw new DatabaseException(e.getMessage());
-                }
-            };
+            return getByPrimaryKey(dbTableClass, keyAndValue, connection);
         } catch (SQLException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new DatabaseException(e.getMessage());
         }
@@ -93,9 +99,36 @@ public class DatabaseRepository implements Database {
     public void insert(SQLQuery query) throws DatabaseException {
         try (Connection connection = getConnection()) {
             generateFullSQLStatement(query);
-            Insert repository = new Insert(connection, query.getSql());
-            repository.withoutGeneratedKey();
+            Insert insert = new Insert(connection, query.getSql());
+            insert.withoutGeneratedKey();
         } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void update(SQLQuery query) throws DatabaseException {
+        try (Connection connection = getConnection()) {
+            generateFullSQLStatement(query);
+            PreparedStatement statement = connection.prepareStatement(query.getSql());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    @Override
+    public <T> T update(SQLQuery query, Class<T> dbTableClass)
+        throws DatabaseException {
+        try (Connection connection = getConnection()) {
+            SQLQuery savedQuery = getSavedQuery(query);
+            generateFullSQLStatement(query);
+            PreparedStatement statement = connection.prepareStatement(query.getSql());
+            statement.executeUpdate();
+            Pair<String, Object> keyAndValue = utils.getPrimaryKeyAndValue(dbTableClass, query);
+            keyAndValue = utils.updateValueIfSettingPrimayKey(dbTableClass, savedQuery, query, keyAndValue);
+            return getByPrimaryKey(dbTableClass, keyAndValue, connection);
+        } catch (SQLException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
             throw new DatabaseException(e.getMessage());
         }
     }

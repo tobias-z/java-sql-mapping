@@ -1,5 +1,6 @@
 package com.tobias_z.api;
 
+import com.mysql.cj.Query;
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.SQLQuery;
 import com.tobias_z.annotations.AutoIncremented;
@@ -50,6 +51,37 @@ class Utils {
             }
         }
         return false;
+    }
+
+    <T> Pair<String, Object> updateValueIfSettingPrimayKey(Class<T> dbTableClass, SQLQuery savedQuery, SQLQuery updatedQuery, Pair<String, Object> keyAndValue) {
+        Object foundValue = keyAndValue.right;
+        Field[] fields = dbTableClass.getDeclaredFields();
+        for (Field field : fields) {
+            PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
+            if (primaryKey != null) {
+                String primaryKeyName = field.getAnnotation(Column.class).name();
+                if (savedQuery.getSql().contains("SET " + primaryKeyName)) {
+                    String strAfterSetPrimaryKey = substringAfter(updatedQuery.getSql(), primaryKeyName);
+                    String strAfterDotOne = substringAfter(strAfterSetPrimaryKey, "'");
+                    String[] strArr = strAfterDotOne.split("'");
+                    foundValue = strArr[0];
+                    try {
+                        Integer.parseInt(String.valueOf(foundValue));
+                    } catch (NumberFormatException e) {
+                        foundValue = "'" + foundValue + "'";
+                    }
+                }
+            }
+        }
+        return new Pair<>(keyAndValue.left, foundValue);
+    }
+
+    private String substringAfter(String str, String separator) {
+        int pos = str.indexOf(separator);
+        if (pos == 0) {
+            return str;
+        }
+        return str.substring(pos + separator.length());
     }
 
     <T> Column getPrimaryKeyColumn(Class<T> dbTableClass) throws NoGeneratedKeyFound {

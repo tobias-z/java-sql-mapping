@@ -2,9 +2,9 @@ package com.tobias_z.api;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
@@ -63,7 +63,7 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @Test
         @DisplayName("should return a user from the auto incremented primary key")
         void shouldReturnAUserFromTheAutoIncrementedPrimaryKey() throws Exception {
-            User user = DB.insert(insertUserQuery, User.class).getGeneratedEntity();
+            User user = DB.insert(insertUserQuery, User.class);
             assertEquals(username, user.getName());
             assertNotNull(user.getId());
         }
@@ -71,7 +71,7 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
         @Test
         @DisplayName("should return a NoIncrement with no auto incremented primary key")
         void shouldReturnANoIncrementWithNoAutoIncrementedPrimaryKey() throws Exception {
-            NoIncrement noIncrement = DB.insert(insertNoIncrementQuery, NoIncrement.class).getGeneratedEntity();
+            NoIncrement noIncrement = DB.insert(insertNoIncrementQuery, NoIncrement.class);
             assertEquals(message, noIncrement.getMessage());
         }
 
@@ -202,6 +202,70 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
             List<NoIncrement> noIncrements = DB.select(query, NoIncrement.class);
             assertNotNull(noIncrements);
             assertEquals(0, noIncrements.size());
+        }
+
+    }
+
+    @Nested
+    @DisplayName("update")
+    class Update {
+
+        SQLQuery insertUserQuery;
+        SQLQuery insertNoIncrementQuery;
+        SQLQuery updateUserQuery;
+        SQLQuery updateNoIncrementQuery;
+
+        String username = "Bob";
+        String message = "Hello Bob";
+        String newName = "Updated Bob";
+        String newMessage = "This is an updated message";
+
+        User user;
+
+        @BeforeEach
+        void setUp() throws Exception {
+            insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
+                .addParameter("name", username);
+            insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
+                .addParameter("message", message);
+            user = DB.insert(insertUserQuery, User.class);
+            DB.insert(insertUserQuery);
+            DB.insert(insertUserQuery);
+            DB.insert(insertNoIncrementQuery);
+            updateUserQuery = new SQLQuery("UPDATE users SET name = :name WHERE id = :id")
+                .addParameter("name", newName)
+                .addParameter("id", user.getId());
+            updateNoIncrementQuery = new SQLQuery("UPDATE no_increment SET message = :newMessage WHERE message = :message")
+                .addParameter("newMessage", newMessage)
+                .addParameter("message", message);
+        }
+
+        @Test
+        @DisplayName("should update a users name to a different value")
+        void shouldUpdateAUsersNameToADifferentValue() throws Exception {
+            User updatedUser = DB.update(updateUserQuery, User.class);
+            assertEquals(user.getId(), updatedUser.getId());
+            assertEquals(newName, updatedUser.getName());
+        }
+
+        @Test
+        @DisplayName("should not throw exception when updating user")
+        void shouldNotThrowExceptionWhenUpdatingUser() {
+            assertDoesNotThrow(() -> DB.update(updateUserQuery));
+        }
+
+        @Test
+        @DisplayName("should not throw exception when updating no increment")
+        void shouldNotThrowExceptionWhenUpdatingNoIncrement() {
+            assertDoesNotThrow(() -> DB.update(updateNoIncrementQuery));
+        }
+
+        @Test
+        @DisplayName("should be able to update primary key of string")
+        void shouldBeAbleToUpdatePrimaryKeyOfString() throws Exception {
+            NoIncrement updatedNoIncrement = DB.update(updateNoIncrementQuery, NoIncrement.class);
+            assertEquals(newMessage, updatedNoIncrement.getMessage());
+            assertNotEquals(message, updatedNoIncrement.getMessage());
         }
 
     }
