@@ -4,7 +4,6 @@ import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.DBConfig;
 import com.tobias_z.DBSetting;
 import com.tobias_z.Database;
-import com.tobias_z.ExecutedQuery;
 import com.tobias_z.SQLQuery;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.Table;
