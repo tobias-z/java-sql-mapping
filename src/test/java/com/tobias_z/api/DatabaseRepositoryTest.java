@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
@@ -266,6 +267,44 @@ class DatabaseRepositoryTest extends SetupIntegrationTests {
             NoIncrement updatedNoIncrement = DB.update(updateNoIncrementQuery, NoIncrement.class);
             assertEquals(newMessage, updatedNoIncrement.getMessage());
             assertNotEquals(message, updatedNoIncrement.getMessage());
+        }
+
+    }
+
+    @Nested
+    @DisplayName("delete")
+    class Delete {
+
+        SQLQuery insertUserQuery;
+        SQLQuery insertNoIncrementQuery;
+        String username = "Bob";
+        String message = "Hello Bob";
+
+        User user;
+
+        @BeforeEach
+        void setUp() throws Exception {
+            insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
+                .addParameter("name", username);
+            insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
+                .addParameter("message", message);
+            user = DB.insert(insertUserQuery, User.class);
+            DB.insert(insertUserQuery);
+            DB.insert(insertUserQuery);
+            DB.insert(insertNoIncrementQuery);
+        }
+
+        @Test
+        @DisplayName("should not throw when deleting user")
+        void shouldNotThrowWhenDeletingUser() {
+            assertDoesNotThrow(() -> DB.delete(user.getId(), User.class));
+        }
+
+        @Test
+        @DisplayName("should not be able to find user when deleted")
+        void shouldNotBeAbleToFindUserWhenDeleted() throws Exception {
+            DB.delete(user.getId(), User.class);
+            assertThrows(DatabaseException.class, () -> DB.get(user.getId(), User.class));
         }
 
     }

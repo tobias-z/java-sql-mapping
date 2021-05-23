@@ -62,13 +62,14 @@ public class DatabaseRepository implements Database {
         return savedQuery;
     }
 
-    private <T> T getByPrimaryKey(Class<T> dbTableClass, Pair<String, Object> keyAndValue, Connection connection)
+    private <T> T getByPrimaryKey(Class<T> dbTableClass, Pair<String, Object> keyAndValue,
+        Connection connection)
         throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Table table = utils.getTableAnnotation(dbTableClass);
         String fieldName = keyAndValue.left;
         Object value = keyAndValue.right;
 
-        var ps = connection.prepareStatement(
+        PreparedStatement ps = connection.prepareStatement(
             "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = " + value);
         ResultSet resultSet = ps.executeQuery();
         ResultSetMapper<T> mapper = new ResultSetMapper<>();
@@ -139,7 +140,7 @@ public class DatabaseRepository implements Database {
             Table table = utils.getTableAnnotation(dbTableClass);
             Column column = utils.getPrimaryKeyColumn(dbTableClass);
             PrimaryKey foundPrimaryKey = utils.getPrimaryKeyStringForSQL(primaryKey);
-            var ps = connection.prepareStatement(
+            PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM " + table.name() + " WHERE " + column.name() + " = " + foundPrimaryKey
             );
             ResultSet resultSet = ps.executeQuery();
@@ -154,7 +155,7 @@ public class DatabaseRepository implements Database {
     public <T> List<T> select(SQLQuery query, Class<T> dbTableClass) throws DatabaseException {
         try (Connection connection = getConnection()) {
             generateFullSQLStatement(query);
-            var ps = connection.prepareStatement(query.getSql());
+            PreparedStatement ps = connection.prepareStatement(query.getSql());
             ResultSet resultSet = ps.executeQuery();
             ResultSetMapper<T> mapper = new ResultSetMapper<>();
             return mapper.mapListOfResults(dbTableClass, resultSet);
@@ -164,10 +165,27 @@ public class DatabaseRepository implements Database {
     }
 
     @Override
+    public <T, PrimaryKey> void delete(PrimaryKey primaryKey, Class<T> dbTableClass)
+        throws DatabaseException {
+        try (Connection connection = getConnection()) {
+            Table table = utils.getTableAnnotation(dbTableClass);
+            Column column = utils.getPrimaryKeyColumn(dbTableClass);
+            PrimaryKey foundPrimaryKey = utils.getPrimaryKeyStringForSQL(primaryKey);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                "DELETE FROM " + table.name() + " WHERE " + column.name() + " = " + foundPrimaryKey
+            );
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    @Override
     public <T> List<T> getAll(Class<T> dbTableClass) throws DatabaseException, NoTableFound {
         try (Connection connection = getConnection()) {
             Table table = utils.getTableAnnotation(dbTableClass);
-            var ps = connection.prepareStatement("SELECT * FROM " + table.name());
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + table.name());
             ResultSet resultSet = ps.executeQuery();
             ResultSetMapper<T> mapper = new ResultSetMapper<>();
             return mapper.mapListOfResults(dbTableClass, resultSet);
