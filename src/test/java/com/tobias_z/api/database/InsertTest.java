@@ -35,7 +35,7 @@ public class InsertTest extends SetupIntegrationTests {
     };
 
     @ParameterizedTest(name = "{1}")
-    @DisplayName("should return a user from the auto incremented primary key")
+    @DisplayName("should not throw exception")
     @ArgumentsSource(DBConfigArgumentProvider.class)
     void shouldNotThrowException(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
         DB = setupTest(dbConfig, beforeEach, migrateFile);

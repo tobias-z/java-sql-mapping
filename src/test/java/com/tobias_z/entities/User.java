@@ -4,6 +4,7 @@ import com.tobias_z.annotations.AutoIncremented;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.Table;
+import org.junit.jupiter.api.AfterAll;
 
 @Table(name = "users")
 public class User {
@@ -16,12 +17,16 @@ public class User {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "active")
+    private boolean active;
+
     public User() {
     }
 
-    public User(Integer id, String name) {
+    public User(Integer id, String name, boolean active) {
         this.id = id;
         this.name = name;
+        this.active = active;
     }
 
     public Integer getId() {
@@ -38,6 +43,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override

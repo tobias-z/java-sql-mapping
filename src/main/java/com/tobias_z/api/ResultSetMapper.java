@@ -13,6 +13,28 @@ import java.util.List;
 
 class ResultSetMapper<T> {
 
+    private boolean isBoolean(Field field) {
+        return field.getType() == boolean.class || field.getType() == Boolean.class;
+    }
+
+    private boolean isInteger(Field field) {
+        return field.getType() == Integer.class || field.getType() == int.class;
+    }
+
+    private Object getValue(Object value, Field field) {
+        Object toReturn = value;
+        if (isBoolean(field)) {
+            if (toReturn.equals("1")) {
+                toReturn = true;
+            } else {
+                toReturn = false;
+            }
+        } else if (isInteger(field)) {
+            toReturn = Integer.parseInt(String.valueOf(value));
+        }
+        return toReturn;
+    }
+
     private T getOneResult(Class<T> clazz, ResultSet resultSet)
         throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, SQLException {
         T dto = clazz.getConstructor().newInstance();
@@ -21,8 +43,9 @@ class ResultSetMapper<T> {
             Column col = field.getAnnotation(Column.class);
             if (col != null) {
                 field.setAccessible(true);
-                String value = resultSet.getString(col.name());
-                field.set(dto, field.getType().getConstructor(String.class).newInstance(value));
+                Object value = resultSet.getString(col.name());
+                value = getValue(value, field);
+                field.set(dto, value);
             }
         }
         return dto;

@@ -5,6 +5,7 @@ CREATE TABLE `chat_test`.`users`
 (
     `id`   INT          NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NULL,
+    `active` BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (`id`)
 );
 
