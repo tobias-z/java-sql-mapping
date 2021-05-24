@@ -15,45 +15,45 @@
     <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
-  <dependencies>
+    <dependencies>
+      <!-- Test dependencies start -->
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.17</version>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.2.20</version>
+      </dependency>
+      <dependency>
+        <groupId>com.microsoft.sqlserver</groupId>
+        <artifactId>mssql-jdbc</artifactId>
+        <version>9.3.1.jre11-preview</version>
+      </dependency>
 
-    <!-- Databases start -->
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.17</version>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.2.20</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.sqlserver</groupId>
-      <artifactId>mssql-jdbc</artifactId>
-      <version>9.3.1.jre11-preview</version>
-    </dependency>
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>3.5.5</version>
+        <scope>test</scope>
+      </dependency>
 
-    <!-- Databases end -->
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.7.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mybatis</groupId>
-      <artifactId>mybatis</artifactId>
-      <version>3.5.5</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>5.7.2</version>
-    </dependency>
-  </dependencies>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>5.7.2</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-params</artifactId>
+        <version>5.7.2</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- Test dependencies end -->
+    </dependencies>
 
   <build>
     <pluginManagement>

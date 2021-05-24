@@ -3,7 +3,7 @@ package com.tobias_z.utils;
 import com.tobias_z.DBConfig;
 import com.tobias_z.DBSetting;
 import com.tobias_z.Database;
-import com.tobias_z.api.DatabaseRepository;
+import com.tobias_z.api.DBConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,14 +40,14 @@ public class SetupIntegrationTests {
     }
 
     public Database setupTest(DBConfig dbConfig, BeforeEachSetup beforeEach, String migrateFile) throws Exception {
-        Database DB = new DatabaseRepository(dbConfig);
+        Database DB = DBConnection.createDatabase(dbConfig);
         runTestDatabaseMigration(dbConfig, migrateFile);
         beforeEach.apply(DB);
         return DB;
     }
 
     public Database setupTest(DBConfig dbConfig, String migrateFile) {
-        Database DB = new DatabaseRepository(dbConfig);
+        Database DB = DBConnection.createDatabase(dbConfig);
         runTestDatabaseMigration(dbConfig, migrateFile);
         return DB;
     }

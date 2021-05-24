@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public class DatabaseRepository implements Database {
+class DatabaseRepository implements Database {
 
     private final DBConfig config;
     private final Utils utils;

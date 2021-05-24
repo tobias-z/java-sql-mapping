@@ -1,6 +1,7 @@
-package com.tobias_z;
+package com.tobias_z.api;
 
-import com.tobias_z.api.DatabaseRepository;
+import com.tobias_z.DBConfig;
+import com.tobias_z.Database;
 
 public interface DBConnection {
 

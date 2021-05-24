@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
@@ -15,6 +16,7 @@ import com.tobias_z.entities.NoIncrement;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -74,6 +76,15 @@ public class InsertTest extends SetupIntegrationTests {
         DB = setupTest(dbConfig, beforeEach, migrateFile);
         DB.insert(insertNoIncrementQuery);
         assertThrows(DatabaseException.class, () -> DB.insert(insertNoIncrementQuery));
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @ArgumentsSource(DBConfigArgumentProvider.class)
+    @DisplayName("should throw exception if incorrect insert query")
+    void shouldThrowExceptionIfIncorrectInsertQuery(DBConfig dbConfig, String dbName, String migrateFile) throws Exception {
+        DB = setupTest(dbConfig, migrateFile);
+        SQLQuery failingQuery = new SQLQuery("INSERT INTO (dsa)");
+        assertThrows(DatabaseException.class, () -> DB.insert(failingQuery, User.class));
     }
 
 }

@@ -1,6 +1,5 @@
 package com.tobias_z.api;
 
-import com.mysql.cj.Query;
 import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.SQLQuery;
 import com.tobias_z.annotations.AutoIncremented;
