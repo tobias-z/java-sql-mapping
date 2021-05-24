@@ -11,7 +11,8 @@ public class DBConfigArgumentProvider implements ArgumentsProvider {
     public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
         return Stream.of(
             Arguments.of(new MySQLTestDBConfig(), "MySQL", "mysql-init.sql"),
-            Arguments.of(new PostgresSQLTestDBConfig(), "PostgresSQL", "postgres-init.sql")
+            Arguments.of(new PostgresSQLTestDBConfig(), "PostgresSQL", "postgres-init.sql"),
+            Arguments.of(new SQLServerDBConfig(), "SQLServer", "sqlserver-init.sql")
         );
     }
 }

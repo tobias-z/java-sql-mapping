@@ -17,3 +17,5 @@ public class PostgresSQLTestDBConfig implements DBConfig {
         return config;
     }
 }
+
+// myReallyStrongPassword1234
