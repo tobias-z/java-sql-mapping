@@ -39,10 +39,10 @@ public class SetupIntegrationTests {
         System.out.println("Done running migration");
     }
 
-    public Database setupTest(DBConfig dbConfig, BeforeEachSetup consumer, String migrateFile) throws Exception {
+    public Database setupTest(DBConfig dbConfig, BeforeEachSetup beforeEach, String migrateFile) throws Exception {
         Database DB = new DatabaseRepository(dbConfig);
         runTestDatabaseMigration(dbConfig, migrateFile);
-        consumer.apply(DB);
+        beforeEach.apply(DB);
         return DB;
     }
 
