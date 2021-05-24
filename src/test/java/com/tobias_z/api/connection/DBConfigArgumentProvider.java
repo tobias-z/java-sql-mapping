@@ -1,4 +1,4 @@
-package com.tobias_z.api;
+package com.tobias_z.api.connection;
 
 import com.tobias_z.api.connection.MySQLTestDBConfig;
 import java.util.stream.Stream;

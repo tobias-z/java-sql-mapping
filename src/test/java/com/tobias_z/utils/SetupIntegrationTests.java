@@ -1,7 +1,9 @@
-package com.tobias_z.api.connection;
+package com.tobias_z.utils;
 
 import com.tobias_z.DBConfig;
 import com.tobias_z.DBSetting;
+import com.tobias_z.Database;
+import com.tobias_z.api.DatabaseRepository;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +37,19 @@ public class SetupIntegrationTests {
             throwables.printStackTrace();
         }
         System.out.println("Done running migration");
+    }
+
+    public Database setupTest(DBConfig dbConfig, BeforeEachSetup consumer, String migrateFile) throws Exception {
+        Database DB = new DatabaseRepository(dbConfig);
+        runTestDatabaseMigration(dbConfig, migrateFile);
+        consumer.apply(DB);
+        return DB;
+    }
+
+    public Database setupTest(DBConfig dbConfig, String migrateFile) {
+        Database DB = new DatabaseRepository(dbConfig);
+        runTestDatabaseMigration(dbConfig, migrateFile);
+        return DB;
     }
 
 }
