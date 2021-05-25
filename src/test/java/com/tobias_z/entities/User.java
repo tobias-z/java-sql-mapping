@@ -4,10 +4,10 @@ import com.tobias_z.annotations.AutoIncremented;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.Table;
-import org.junit.jupiter.api.AfterAll;
 
 @Table(name = "users")
 public class User {
+
 
     @AutoIncremented
     @PrimaryKey
@@ -20,13 +20,17 @@ public class User {
     @Column(name = "active")
     private boolean active;
 
+    @Column(name = "role")
+    private Role role;
+
     public User() {
     }
 
-    public User(Integer id, String name, boolean active) {
+    public User(Integer id, String name, boolean active, Role role) {
         this.id = id;
         this.name = name;
         this.active = active;
+        this.role = role;
     }
 
     public Integer getId() {
@@ -51,6 +55,14 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override

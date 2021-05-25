@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
 import com.tobias_z.SQLQuery;
+import com.tobias_z.entities.Role;
 import com.tobias_z.utils.BeforeEachSetup;
 import com.tobias_z.api.connection.DBConfigArgumentProvider;
 import com.tobias_z.utils.SetupIntegrationTests;
@@ -43,13 +44,15 @@ public class UpdateTest extends SetupIntegrationTests {
         database.insert(insertUserQuery);
         database.insert(insertUserQuery);
         database.insert(insertNoIncrementQuery);
-        updateUserQuery = new SQLQuery("UPDATE users SET name = :name, active = :active WHERE id = :id")
+        updateUserQuery = new SQLQuery("UPDATE users SET name = :name, active = :active, role = :role WHERE id = :id")
             .addParameter("name", newName)
+            .addParameter("role", Role.EMPLOYEE)
             .addParameter("active", false)
             .addParameter("id", user.getId());
         updateNoIncrementQuery = new SQLQuery(
-            "UPDATE no_increment SET message = :newMessage WHERE message = :message")
+            "UPDATE no_increment SET message = :newMessage, role = :role WHERE message = :message")
             .addParameter("newMessage", newMessage)
+            .addParameter("role", Role.EMPLOYEE)
             .addParameter("message", message);
     };
 
@@ -61,6 +64,7 @@ public class UpdateTest extends SetupIntegrationTests {
         DB = setupTest(dbConfig, beforeEach, migrateFile);
         User updatedUser = DB.update(updateUserQuery, User.class);
         assertEquals(user.getId(), updatedUser.getId());
+        assertEquals(Role.EMPLOYEE, updatedUser.getRole());
         assertEquals(newName, updatedUser.getName());
     }
 
@@ -91,6 +95,7 @@ public class UpdateTest extends SetupIntegrationTests {
         DB = setupTest(dbConfig, beforeEach, migrateFile);
         NoIncrement updatedNoIncrement = DB.update(updateNoIncrementQuery, NoIncrement.class);
         assertEquals(newMessage, updatedNoIncrement.getMessage());
+        assertEquals(Role.EMPLOYEE, updatedNoIncrement.getRole());
         assertNotEquals(message, updatedNoIncrement.getMessage());
     }
 

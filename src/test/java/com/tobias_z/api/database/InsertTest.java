@@ -10,6 +10,7 @@ import com.tobias_z.Database;
 import com.tobias_z.SQLQuery;
 import com.tobias_z.api.connection.DBConfigArgumentProvider;
 import com.tobias_z.entities.NoIncrement;
+import com.tobias_z.entities.Role;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
 import com.tobias_z.utils.BeforeEachSetup;
@@ -28,11 +29,13 @@ public class InsertTest extends SetupIntegrationTests {
     private static Database DB;
 
     private final BeforeEachSetup beforeEach = (database) -> {
-        insertUserQuery = new SQLQuery("INSERT INTO users (name, active) VALUES (:name, :active)")
+        insertUserQuery = new SQLQuery("INSERT INTO users (name, active, role) VALUES (:name, :active, :role)")
             .addParameter("name", username)
-            .addParameter("active", false);
-        insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
-            .addParameter("message", message);
+            .addParameter("active", false)
+            .addParameter("role", Role.ADMIN);
+        insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message, role) VALUES (:message, :role)")
+            .addParameter("message", message)
+            .addParameter("role", Role.EMPLOYEE);
     };
 
     @ParameterizedTest(name = "{1}")
@@ -52,6 +55,7 @@ public class InsertTest extends SetupIntegrationTests {
         DB = setupTest(dbConfig, beforeEach, migrateFile);
         User user = DB.insert(insertUserQuery, User.class);
         assertEquals(username, user.getName());
+        assertEquals(Role.ADMIN, user.getRole());
         assertNotNull(user.getId());
     }
 
@@ -64,6 +68,7 @@ public class InsertTest extends SetupIntegrationTests {
         DB = setupTest(dbConfig, beforeEach, migrateFile);
         NoIncrement noIncrement = DB.insert(insertNoIncrementQuery, NoIncrement.class);
         assertEquals(message, noIncrement.getMessage());
+        assertEquals(Role.EMPLOYEE, noIncrement.getRole());
     }
 
     @ParameterizedTest(name = "{1}")

@@ -1,6 +1,5 @@
 package com.tobias_z.api;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.annotations.Column;
 import com.tobias_z.annotations.PrimaryKey;
 import com.tobias_z.exceptions.NoGeneratedKeyFound;
@@ -8,7 +7,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +22,15 @@ class ResultSetMapper<T> {
         return field.getType() == Integer.class || field.getType() == int.class;
     }
 
+    private boolean isEnumAndNotNull(Field field, Object toReturn) {
+        return field.getType().isEnum() && toReturn != null;
+    }
+
     private Object getValue(Object value, Field field) {
         Object toReturn = value;
-        if (isBoolean(field)) {
+        if (isEnumAndNotNull(field, toReturn)) {
+            toReturn = Enum.valueOf((Class) field.getType(), toReturn.toString());
+        } else if (isBoolean(field)) {
             if (toReturn.equals("1")) {
                 toReturn = true;
             } else {

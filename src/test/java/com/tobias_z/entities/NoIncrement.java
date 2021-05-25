@@ -11,8 +11,12 @@ public class NoIncrement {
     @Column(name = "message")
     private String message;
 
-    public NoIncrement(String message) {
+    @Column(name = "role")
+    private Role role;
+
+    public NoIncrement(String message, Role role) {
         this.message = message;
+        this.role = role;
     }
 
     public NoIncrement() {
@@ -24,6 +28,14 @@ public class NoIncrement {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override
