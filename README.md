@@ -1,10 +1,49 @@
-# Hello world
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+<div align="center">
+  <h1>Java SQL Mapping</h1>
+  <p>Mapping of SQL statements into it's corresponding object 🤩</p>
+</div>
+
+---
+
+![documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
+![GitHub](https://img.shields.io/github/license/tobias-z/java-sql-mapper)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+## READ THIS
+
+`This package is still in beta, and is not recommended to be used in production.`
+
+## Supported databases
+
+## The problem
+
+## This solution
+
+## Installation
+
+## Usage
+
+## Issues
+
+Looking to contribute? Any feedback is very appreciated.
+
+### 🪲 Bugs
+
+Please file an issue for bugs, missing documentation, unexpected behavior etc.
+
+[**Create bug report**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=)
+
+### 🕯 Feature Requests
+
+Please file an issue to suggest new features. Vote on feature requests by adding
+a 👍.
+
+[**Create Feature Requests**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=feature_request.md&title=)
+
 ## Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people
+([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -20,4 +59,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the
+[all-contributors](https://github.com/all-contributors/all-contributors)
+specification. Contributions of any kind welcome!

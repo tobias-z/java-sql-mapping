@@ -10,6 +10,9 @@ import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import com.tobias_z.exceptions.NoPrimaryKeyFound;
 import com.tobias_z.exceptions.NoTableFound;
 import java.lang.reflect.Field;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 
 class Utils {
 
@@ -22,7 +25,7 @@ class Utils {
         return primaryKey;
     }
 
-    <T> Pair<String, Object> getPrimaryKeyAndValue(Class<T> dbTableClass, SQLQuery query)
+    <T> Entry<String, Object> getPrimaryKeyAndValue(Class<T> dbTableClass, SQLQuery query)
         throws NoPrimaryKeyFound {
         Field[] fields = dbTableClass.getDeclaredFields();
         for (Field field : fields) {
@@ -35,7 +38,7 @@ class Utils {
                 } catch (NumberFormatException e) {
                     value = "'" + value + "'";
                 }
-                return new Pair<>(key, value);
+                return new SimpleEntry<>(key, value);
             }
         }
         throw new NoPrimaryKeyFound("Did not find a a primary key on class: " + dbTableClass.getName());
@@ -52,8 +55,8 @@ class Utils {
         return false;
     }
 
-    <T> Pair<String, Object> updateValueIfSettingPrimayKey(Class<T> dbTableClass, SQLQuery savedQuery, SQLQuery updatedQuery, Pair<String, Object> keyAndValue) {
-        Object foundValue = keyAndValue.right;
+    <T> Entry<String, Object> updateValueIfSettingPrimayKey(Class<T> dbTableClass, SQLQuery savedQuery, SQLQuery updatedQuery, Entry<String, Object> keyAndValue) {
+        Object foundValue = keyAndValue.getValue();
         Field[] fields = dbTableClass.getDeclaredFields();
         for (Field field : fields) {
             PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
@@ -72,7 +75,7 @@ class Utils {
                 }
             }
         }
-        return new Pair<>(keyAndValue.left, foundValue);
+        return new SimpleEntry<>(keyAndValue.getKey(), foundValue);
     }
 
     private String substringAfter(String str, String separator) {

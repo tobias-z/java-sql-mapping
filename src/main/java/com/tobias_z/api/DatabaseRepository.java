@@ -1,6 +1,5 @@
 package com.tobias_z.api;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.DBConfig;
 import com.tobias_z.DBSetting;
 import com.tobias_z.Database;
@@ -19,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 class DatabaseRepository implements Database {
 
@@ -62,12 +62,13 @@ class DatabaseRepository implements Database {
         return savedQuery;
     }
 
-    private <T> T getByPrimaryKey(Class<T> dbTableClass, Pair<String, Object> keyAndValue,
+
+    private <T> T getByPrimaryKey(Class<T> dbTableClass, Entry<String, Object> keyAndValue,
         Connection connection)
         throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Table table = utils.getTableAnnotation(dbTableClass);
-        String fieldName = keyAndValue.left;
-        Object value = keyAndValue.right;
+        String fieldName = keyAndValue.getKey();
+        Object value = keyAndValue.getValue();
 
         PreparedStatement ps = connection.prepareStatement(
             "SELECT * FROM " + table.name() + " WHERE " + fieldName + " = " + value);
@@ -81,7 +82,7 @@ class DatabaseRepository implements Database {
         throws DatabaseException, NoGeneratedKeyFound, NoPrimaryKeyFound, NoTableFound {
         try (Connection connection = getConnection()) {
             generateFullSQLStatement(query);
-            Pair<String, Object> keyAndValue;
+            Entry<String, Object> keyAndValue;
             Insert insert = new Insert(connection, query.getSql());
             if (utils.isWithGeneratedKey(dbTableClass)) {
                 keyAndValue = insert.withGeneratedKey(dbTableClass);
@@ -125,7 +126,7 @@ class DatabaseRepository implements Database {
             generateFullSQLStatement(query);
             PreparedStatement statement = connection.prepareStatement(query.getSql());
             statement.executeUpdate();
-            Pair<String, Object> keyAndValue = utils.getPrimaryKeyAndValue(dbTableClass, query);
+            Entry<String, Object> keyAndValue = utils.getPrimaryKeyAndValue(dbTableClass, query);
             keyAndValue = utils.updateValueIfSettingPrimayKey(dbTableClass, savedQuery, query, keyAndValue);
             return getByPrimaryKey(dbTableClass, keyAndValue, connection);
         } catch (SQLException | InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {

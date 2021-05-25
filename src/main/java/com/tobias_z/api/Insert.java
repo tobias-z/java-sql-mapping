@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map.Entry;
 
 class Insert {
 
@@ -25,7 +26,7 @@ class Insert {
         statement.executeUpdate();
     }
 
-    public <T> Pair<String, Object> withGeneratedKey(Class<T> dbTableClass)
+    public <T> Entry<String, Object> withGeneratedKey(Class<T> dbTableClass)
         throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoGeneratedKeyFound {
         PreparedStatement statement = connection.prepareStatement(
             query,

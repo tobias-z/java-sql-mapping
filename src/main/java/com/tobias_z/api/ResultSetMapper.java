@@ -8,8 +8,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 class ResultSetMapper<T> {
 
@@ -68,7 +71,7 @@ class ResultSetMapper<T> {
         return tList;
     }
 
-    public Pair<String, Object> getPrimaryKeyAndFieldName(Class<T> clazz, ResultSet resultSet)
+    public Entry<String, Object> getPrimaryKeyAndFieldName(Class<T> clazz, ResultSet resultSet)
         throws SQLException, NoGeneratedKeyFound {
         if (resultSet.next()) {
             Field[] fields = clazz.getDeclaredFields();
@@ -77,7 +80,7 @@ class ResultSetMapper<T> {
                 Column column = field.getAnnotation(Column.class);
                 if (key != null && column != null) {
                     int id = resultSet.getInt(1);
-                    return new Pair<>(column.name(), id);
+                    return new SimpleEntry<>(column.name(), id);
                 }
             }
         }
