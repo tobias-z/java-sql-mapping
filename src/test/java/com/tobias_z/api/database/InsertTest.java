@@ -4,19 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
 import com.tobias_z.SQLQuery;
-import com.tobias_z.utils.BeforeEachSetup;
 import com.tobias_z.api.connection.DBConfigArgumentProvider;
-import com.tobias_z.utils.SetupIntegrationTests;
 import com.tobias_z.entities.NoIncrement;
 import com.tobias_z.entities.User;
 import com.tobias_z.exceptions.DatabaseException;
+import com.tobias_z.utils.BeforeEachSetup;
+import com.tobias_z.utils.SetupIntegrationTests;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
@@ -30,8 +28,9 @@ public class InsertTest extends SetupIntegrationTests {
     private static Database DB;
 
     private final BeforeEachSetup beforeEach = (database) -> {
-        insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
-            .addParameter("name", username);
+        insertUserQuery = new SQLQuery("INSERT INTO users (name, active) VALUES (:name, :active)")
+            .addParameter("name", username)
+            .addParameter("active", false);
         insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
             .addParameter("message", message);
     };

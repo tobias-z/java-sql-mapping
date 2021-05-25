@@ -34,16 +34,18 @@ public class UpdateTest extends SetupIntegrationTests {
     User user;
 
     private final BeforeEachSetup beforeEach = (database) -> {
-        insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
-            .addParameter("name", username);
+        insertUserQuery = new SQLQuery("INSERT INTO users (name, active) VALUES (:name, :active)")
+            .addParameter("name", username)
+            .addParameter("active", true);
         insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
             .addParameter("message", message);
         user = database.insert(insertUserQuery, User.class);
         database.insert(insertUserQuery);
         database.insert(insertUserQuery);
         database.insert(insertNoIncrementQuery);
-        updateUserQuery = new SQLQuery("UPDATE users SET name = :name WHERE id = :id")
+        updateUserQuery = new SQLQuery("UPDATE users SET name = :name, active = :active WHERE id = :id")
             .addParameter("name", newName)
+            .addParameter("active", false)
             .addParameter("id", user.getId());
         updateNoIncrementQuery = new SQLQuery(
             "UPDATE no_increment SET message = :newMessage WHERE message = :message")

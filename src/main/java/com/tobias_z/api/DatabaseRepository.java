@@ -47,6 +47,10 @@ class DatabaseRepository implements Database {
         query.getParameters()
             .forEach((name, value) -> {
                 String valueToUse = value;
+                String url = config.getConfiguration().get(DBSetting.URL);
+                if (url.contains("mysql")) {
+                    valueToUse = utils.getTinyIntIfBooleanType(value);
+                }
                 try {
                     Integer.parseInt(valueToUse);
                 } catch (NumberFormatException e) {

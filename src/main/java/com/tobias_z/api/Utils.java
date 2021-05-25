@@ -1,6 +1,5 @@
 package com.tobias_z.api;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 import com.tobias_z.SQLQuery;
 import com.tobias_z.annotations.AutoIncremented;
 import com.tobias_z.annotations.Column;
@@ -10,7 +9,6 @@ import com.tobias_z.exceptions.NoGeneratedKeyFound;
 import com.tobias_z.exceptions.NoPrimaryKeyFound;
 import com.tobias_z.exceptions.NoTableFound;
 import java.lang.reflect.Field;
-import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
@@ -53,6 +51,15 @@ class Utils {
             }
         }
         return false;
+    }
+
+    String getTinyIntIfBooleanType(String value) {
+        if (value.equals("true") || value.equals("True")) {
+            return "1";
+        } else if (value.equals("false") || value.equals("False")) {
+            return "0";
+        }
+        return value;
     }
 
     <T> Entry<String, Object> updateValueIfSettingPrimayKey(Class<T> dbTableClass, SQLQuery savedQuery, SQLQuery updatedQuery, Entry<String, Object> keyAndValue) {
