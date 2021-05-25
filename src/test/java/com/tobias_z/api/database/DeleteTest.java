@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.tobias_z.DBConfig;
 import com.tobias_z.Database;
 import com.tobias_z.SQLQuery;
+import com.tobias_z.entities.Role;
 import com.tobias_z.utils.BeforeEachSetup;
 import com.tobias_z.api.connection.DBConfigArgumentProvider;
 import com.tobias_z.utils.SetupIntegrationTests;
@@ -27,10 +28,13 @@ public class DeleteTest extends SetupIntegrationTests {
     User user;
 
     private final BeforeEachSetup beforeEach = (database) -> {
-        insertUserQuery = new SQLQuery("INSERT INTO users (name) VALUES (:name)")
-            .addParameter("name", username);
-        insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message) VALUES (:message)")
-            .addParameter("message", message);
+        insertUserQuery = new SQLQuery("INSERT INTO users (name, active, role) VALUES (:name, :active, :role)")
+            .addParameter("name", username)
+            .addParameter("active", false)
+            .addParameter("role", Role.ADMIN);
+        insertNoIncrementQuery = new SQLQuery("INSERT INTO no_increment (message, role) VALUES (:message, :role)")
+            .addParameter("message", message)
+            .addParameter("role", Role.EMPLOYEE);
         user = database.insert(insertUserQuery, User.class);
         database.insert(insertUserQuery);
         database.insert(insertUserQuery);
