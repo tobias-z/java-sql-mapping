@@ -79,8 +79,7 @@ provide to the `DBConnection.createDatabase()` method
 ```java
 public class UserRepository {
 
-    private static final Database db = DBConnection
-        .createDatabase(new MySQLDBConfig());
+    private static final Database db = DBConnection.createDatabase(new MySQLDBConfig());
 
     public User getUserById(int id) throws Exception {
         User user = db.get(id, User.class);
@@ -100,17 +99,16 @@ public class UserRepository {
     }
 
     public User createUser(String username, String password) throws Exception {
-        SQLQuery insertQuery = new SQLQuery(
-            "INSERT INTO users (username, password) VALUES (:username, :password)"
-        ).addParameter("username", username).addParameter("password", password);
+        SQLQuery insertQuery = new SQLQuery("INSERT INTO users (username, password) VALUES (:username, :password)")
+            .addParameter("username", username)
+            .addParameter("password", password);
         User createdUser = db.insert(insertQuery, User.class);
         return createdUser;
     }
 
     public User updateUser(int id, String username) throws Exception {
-        SQLQuery updateQuery = new SQLQuery(
-            "UPDATE users SET username = :username WHERE id = :id"
-        ).addParameter("username", username)
+        SQLQuery updateQuery = new SQLQuery("UPDATE users SET username = :username WHERE id = :id")
+            .addParameter("username", username)
             .addParameter("id", id);
         User updatedUser = db.update(updateQuery, User.class);
         return updatedUser;
