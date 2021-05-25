@@ -17,13 +17,112 @@
 
 ## The problem
 
+You are tired of doing your mapping of sql queries yourself, making your
+repositories huge. You don't want to use an ORM framework, but still want the
+mapping part of them.
+
 ## This solution
+
+Java SQL Mapping is a package designed to work on any SQL database (see
+[Supported](#Supported) section).
+
+It allows you to create SQL queries, which will then be run through a jdbc
+connection, and then return the object corresponding to your query.
 
 ## Installation
 
-## Supported databases
+TBA
+
+## Supported
+
+Currently Java SQL Mapping has support for 3 databases:
+
+- MySQL
+- PostgreSQL
+- SQLServer
+
+These three have are listed since they have been thoroughly tested.
+
+It is possible that other SQL databases are supported, but they have not been
+tested.
 
 ## Usage
+
+### Setup
+
+Java SQL Mapping has a very simple setup. It provides a
+`DBConnection.createDatabase()` method, which takes a `DBConfig`
+
+### Example MySQL config
+
+```java
+public class MySQLDBConfig implements DBConfig {
+
+    @Override
+    public Map<DBSetting, String> getConfiguration() {
+        Map<DBSetting, String> config = new HashMap<>();
+        config.put(DBSetting.JDBC_DRIVER, "com.mysql.cj.jdbc.Driver");
+        config.put(DBSetting.USER, "YOUR_USER");
+        config.put(DBSetting.PASSWORD, "SUPER_SECRET_PASSWORD");
+        config.put(DBSetting.URL, "jdbc:mysql://localhost:3306/chat_test");
+        return config;
+    }
+
+}
+```
+
+### Example implementation
+
+Following example can be used for any config. Just change the DBConfig you
+provide to the `DBConnection.createDatabase()` method
+
+```java
+public class UserRepository {
+
+    private static final Database db = DBConnection
+        .createDatabase(new MySQLDBConfig());
+
+    public User getUserById(int id) throws Exception {
+        User user = db.get(id, User.class);
+        return user;
+    }
+
+    public List<User> getAllUsers() throws Exception {
+        List<User> users = db.getAll(User.class);
+        return users;
+    }
+
+    public List<User> findAllUsersWithRole(Role role) throws Exception {
+        SQLQuery query = new SQLQuery("SELECT * FROM users WHERE role = :role")
+            .addParameter("role", role);
+        List<User> users = db.select(query, User.class);
+        return users;
+    }
+
+    public User createUser(String username, String password) throws Exception {
+        SQLQuery insertQuery = new SQLQuery(
+            "INSERT INTO users (username, password) VALUES (:username, :password)"
+        ).addParameter("username", username).addParameter("password", password);
+        User createdUser = db.insert(insertQuery, User.class);
+        return createdUser;
+    }
+
+    public User updateUser(int id, String username) throws Exception {
+        SQLQuery updateQuery = new SQLQuery(
+            "UPDATE users SET username = :username WHERE id = :id"
+        ).addParameter("username", username)
+            .addParameter("id", id);
+        User updatedUser = db.update(updateQuery, User.class);
+        return updatedUser;
+    }
+
+    public void deleteUser(int id) throws Exception {
+        // Can also pass an SQLQuery
+        db.delete(id, User.class);
+    }
+
+}
+```
 
 ## Issues
 
@@ -33,14 +132,16 @@ Looking to contribute? Any feedback is very appreciated.
 
 Please file an issue for bugs, missing documentation, unexpected behavior etc.
 
-[**Create bug report**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=)
+[**Create bug
+report**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=)
 
 ### 🕯 Feature Requests
 
 Please file an issue to suggest new features. Vote on feature requests by adding
 a 👍.
 
-[**Create Feature Requests**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=feature_request.md&title=)
+[**Create Feature
+Requests**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=feature_request.md&title=)
 
 ## Contributors ✨
 
