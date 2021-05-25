@@ -4,10 +4,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.tobias-z</groupId>
-  <artifactId>java-sql-mapper</artifactId>
+  <groupId>io.github.tobias-z</groupId>
+  <artifactId>java-sql-mapping</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>java-sql-mapper</name>
+  <name>java-sql-mapping</name>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
