@@ -32,7 +32,24 @@ connection, and then return the object corresponding to your query.
 
 ## Installation
 
-TBA
+### Apache Maven
+
+```xml
+<dependency>
+  <groupId>io.github.tobias-z</groupId>
+  <artifactId>java-sql-mapping</artifactId>
+  <version>1.0.2</version>
+</dependency>
+```
+
+### Gradle Groovy DSL
+
+```
+implementation 'io.github.tobias-z:java-sql-mapping:1.0.2'
+```
+
+For other methods see
+[Central Repository](https://maven-badges.herokuapp.com/maven-central/io.github.tobias-z/java-sql-mapping)
 
 ## Supported
 
