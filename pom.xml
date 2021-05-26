@@ -6,7 +6,7 @@
 
   <groupId>io.github.tobias-z</groupId>
   <artifactId>java-sql-mapping</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>${project.groupId}:${project.artifactId}</name>
 
   <description>A library for mapping of SQL statements into it's corresponding object</description>

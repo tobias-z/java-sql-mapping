@@ -8,6 +8,7 @@
 ![documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
 ![GitHub](https://img.shields.io/github/license/tobias-z/java-sql-mapper)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.tobias-z/java-sql-mapping)
 
 ## READ THIS
 
