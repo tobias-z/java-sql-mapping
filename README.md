@@ -8,7 +8,7 @@
 ![documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
 ![GitHub](https://img.shields.io/github/license/tobias-z/java-sql-mapper)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-![Maven Central](https://img.shields.io/maven-central/v/io.github.tobias-z/java-sql-mapping)
+[![Maven Central](https://maven-badges.herokapp.com/maven-central/io.github.tobias-z/java-sql-mapping/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.tobias-z/java-sql-mapping)
 
 ## READ THIS
 
@@ -100,7 +100,8 @@ public class UserRepository {
     }
 
     public User createUser(String username, String password) throws Exception {
-        SQLQuery insertQuery = new SQLQuery("INSERT INTO users (username, password) VALUES (:username, :password)")
+        SQLQuery insertQuery = new SQLQuery(
+            "INSERT INTO users (username, password) VALUES (:username, :password)")
             .addParameter("username", username)
             .addParameter("password", password);
         User createdUser = db.insert(insertQuery, User.class);
@@ -108,7 +109,8 @@ public class UserRepository {
     }
 
     public User updateUser(int id, String username) throws Exception {
-        SQLQuery updateQuery = new SQLQuery("UPDATE users SET username = :username WHERE id = :id")
+        SQLQuery updateQuery = new SQLQuery(
+            "UPDATE users SET username = :username WHERE id = :id")
             .addParameter("username", username)
             .addParameter("id", id);
         User updatedUser = db.update(updateQuery, User.class);
