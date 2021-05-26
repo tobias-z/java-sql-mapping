@@ -8,7 +8,7 @@
 ![documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
 ![GitHub](https://img.shields.io/github/license/tobias-z/java-sql-mapper)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-[![Maven Central](https://maven-badges.herokapp.com/maven-central/io.github.tobias-z/java-sql-mapping/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.tobias-z/java-sql-mapping)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.tobias-z/java-sql-mapping)](https://maven-badges.herokuapp.com/maven-central/io.github.tobias-z/java-sql-mapping)
 
 ## READ THIS
 
@@ -72,6 +72,45 @@ public class MySQLDBConfig implements DBConfig {
 }
 ```
 
+### Example entity
+
+```java
+@Table(name = "users")
+public class User {
+
+    @AutoIncremented
+    @PrimaryKey
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "password")
+    private String password;
+
+    public User() {
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    //...getters and setters
+
+}
+```
+
+### Annotations
+
+```java
+@Table(name = "table name") //required
+@Column(name = "col name") //required
+@PrimaryKey //required
+@AutoIncremented
+```
+
 ### Example implementation
 
 Following example can be used for any config. Just change the DBConfig you
@@ -133,16 +172,14 @@ Looking to contribute? Any feedback is very appreciated.
 
 Please file an issue for bugs, missing documentation, unexpected behavior etc.
 
-[**Create bug
-report**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=)
+[**Create bug report**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=)
 
 ### 🕯 Feature Requests
 
 Please file an issue to suggest new features. Vote on feature requests by adding
 a 👍.
 
-[**Create Feature
-Requests**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=feature_request.md&title=)
+[**Create Feature Requests**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=feature_request.md&title=)
 
 ## Contributors ✨
 

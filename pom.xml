@@ -31,7 +31,7 @@
   <scm>
     <connection>scm:git:git://github.com/tobias-z/java-sql-mapping.git</connection>
     <developerConnection>scm:git:ssh://github.com:tobias-z/java-sql-mapping.git</developerConnection>
-    <url>https://github.com/tobias-z/tree/main</url>
+    <url>https://github.com/tobias-z/java-sql-mapping/tree/main</url>
   </scm>
 
   <distributionManagement>
