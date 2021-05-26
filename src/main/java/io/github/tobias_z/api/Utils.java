@@ -1,6 +1,5 @@
 package io.github.tobias_z.api;
 
-import io.github.tobias_z.SQLQuery;
 import io.github.tobias_z.annotations.AutoIncremented;
 import io.github.tobias_z.annotations.Column;
 import io.github.tobias_z.annotations.PrimaryKey;

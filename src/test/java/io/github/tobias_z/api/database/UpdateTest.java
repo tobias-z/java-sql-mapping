@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import io.github.tobias_z.DBConfig;
 import io.github.tobias_z.Database;
-import io.github.tobias_z.SQLQuery;
+import io.github.tobias_z.api.SQLQuery;
 import io.github.tobias_z.entities.NoIncrement;
 import io.github.tobias_z.entities.Role;
 import io.github.tobias_z.entities.User;

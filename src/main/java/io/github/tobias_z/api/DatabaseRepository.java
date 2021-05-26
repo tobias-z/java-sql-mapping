@@ -3,7 +3,6 @@ package io.github.tobias_z.api;
 import io.github.tobias_z.DBConfig;
 import io.github.tobias_z.DBSetting;
 import io.github.tobias_z.Database;
-import io.github.tobias_z.SQLQuery;
 import io.github.tobias_z.annotations.Column;
 import io.github.tobias_z.annotations.Table;
 import io.github.tobias_z.exceptions.DatabaseException;
@@ -140,7 +139,7 @@ class DatabaseRepository implements Database {
 
     @Override
     public <T, PrimaryKey> T get(PrimaryKey primaryKey, Class<T> dbTableClass)
-        throws DatabaseException, NoTableFound, NoGeneratedKeyFound {
+        throws DatabaseException, NoTableFound {
         try (Connection connection = getConnection()) {
             Table table = utils.getTableAnnotation(dbTableClass);
             Column column = utils.getPrimaryKeyColumn(dbTableClass);
