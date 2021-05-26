@@ -38,14 +38,14 @@ connection, and then return the object corresponding to your query.
 <dependency>
   <groupId>io.github.tobias-z</groupId>
   <artifactId>java-sql-mapping</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
 ### Gradle Groovy DSL
 
 ```
-implementation 'io.github.tobias-z:java-sql-mapping:1.0.2'
+implementation 'io.github.tobias-z:java-sql-mapping:1.0.3'
 ```
 
 For other methods see
