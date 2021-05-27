@@ -2,6 +2,10 @@
 
 Thank you for wanting to contribute!
 
+If this is your first Pull Request, then watching this [**How to Contribute to an Open Source Project on Github**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=) 
+by Kent C. Dodds is very helpful. 
+
+
 ## Project setup
 
 _The tests are using multiple database connections running on a docker
