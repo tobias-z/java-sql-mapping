@@ -2,7 +2,7 @@
 
 Thank you for wanting to contribute!
 
-If this is your first Pull Request, then watching this [**How to Contribute to an Open Source Project on Github**](https://github.com/tobias-z/java-sql-mapper/issues/new?assignees=&labels=&template=bug_report.md&title=) 
+If this is your first Pull Request, then watching this [**How to Contribute to an Open Source Project on Github**](https://app.egghead.io/playlists/how-to-contribute-to-an-open-source-project-on-github) 
 by Kent C. Dodds is very helpful. 
 
 
