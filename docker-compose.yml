@@ -40,7 +40,6 @@ services:
     image: "mcr.microsoft.com/mssql/server:2019-latest"
     container_name: sqlserver_JSM
     restart: unless-stopped
-    build: ./sqlserver/
 
     environment:
       ACCEPT_EULA: "Y"
@@ -51,6 +50,3 @@ services:
 
     expose:
       - "1433"
-
-    volumes:
-      - ./sqlserver/startscript:/docker-entrypoint-initdb.d
