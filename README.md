@@ -183,7 +183,9 @@ public class UserRepository {
 
 ## Issues
 
-Looking to contribute? Any feedback is very appreciated.
+Looking to contribute? Please read the `CONTRIBUTING.md` file, which contains information about making a PR.
+
+Any feedback is very appreciated!
 
 ### 🪲 Bugs
 
