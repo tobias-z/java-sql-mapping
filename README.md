@@ -5,6 +5,7 @@
 
 ---
 
+[![Build Status](https://travis-ci.com/tobias-z/java-sql-mapping.svg?branch=main)](https://travis-ci.com/tobias-z/java-sql-mapping)
 ![documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
 ![GitHub](https://img.shields.io/github/license/tobias-z/java-sql-mapper)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
