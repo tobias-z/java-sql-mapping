@@ -1,32 +1,10 @@
+services:
+  - docker
+
 script:
   - mvn test
 
-services:
-  - mysql
-  - postgresql
-
-env:
-  global:
-    - PGPORT=5432
-    - PGUSER=dev
-
 before_script:
-  # Postgres
-  - psql -c 'CREATE ROLE dev LOGIN SUPERUSER PASSWORD 'SECRET';' -U postgres
-  - psql -c 'create database chat_test;' -U postgres
-
-  # MySQL
-  - sudo apt-get update || true
-  - sudo apt-get install -y debconf-utils
-  - sudo debconf-set-selections <<< 'mysql-apt-config
-    mysql-apt-config/select-server select mysql-8.0'
-  - wget https://dev.mysql.com/get/mysql-apt-config_0.8.13-1_all.deb
-  - sudo -E dpkg -i mysql-apt-config_0.8.13-1_all.deb
-  - sudo apt-get update || true
-
-  - echo "Installing MySQL 8..."
-  - sudo -E apt-get -y install mysql-server
-
-  - sudo mysql -u root -e "CREATE User 'dev'@'localhost' IDENTIFIED BY 'SECRET';
-    GRANT ALL PRIVILEGES ON *.* TO 'dev'@'localhost' WITH GRANT OPTION;"
-  - sudo mysql -u dev -pax2 -e "CREATE DATABASE chat_test;"
+  - docker-compose build
+  - docker-compose up -d
+  - docker ps
