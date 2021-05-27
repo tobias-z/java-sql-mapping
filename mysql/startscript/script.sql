@@ -1,0 +1,4 @@
+CREATE DATABASE chat_test;
+
+CREATE USER 'dev'@'%' IDENTIFIED BY 'SECRET';
+GRANT ALL ON *.* TO 'dev'@'%';

@@ -1,5 +1,3 @@
-use chat_test;
-
 DROP TABLE IF EXISTS users;
 CREATE TABLE users
 (

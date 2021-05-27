@@ -12,8 +12,8 @@ public class SQLServerDBConfig implements DBConfig {
         Map<DBSetting, String> config = new HashMap<>();
         config.put(DBSetting.JDBC_DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
         config.put(DBSetting.USER, "sa");
-        config.put(DBSetting.PASSWORD, "myReallyStrongPassword1234");
-        config.put(DBSetting.URL, "jdbc:sqlserver://localhost;database=chat_test;");
+        config.put(DBSetting.PASSWORD, "thisIsSuperSecret1234321");
+        config.put(DBSetting.URL, "jdbc:sqlserver://localhost;database=tempdb;");
         return config;
     }
 }

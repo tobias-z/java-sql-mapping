@@ -12,8 +12,8 @@ public class MySQLTestDBConfig implements DBConfig {
         Map<DBSetting, String> config = new HashMap<>();
         config.put(DBSetting.JDBC_DRIVER, "com.mysql.cj.jdbc.Driver");
         config.put(DBSetting.USER, "dev");
-        config.put(DBSetting.PASSWORD, "ax2");
-        config.put(DBSetting.URL, "jdbc:mysql://localhost:3306/chat_test");
+        config.put(DBSetting.PASSWORD, "SECRET");
+        config.put(DBSetting.URL, "jdbc:mysql://localhost/chat_test");
         return config;
     }
 }

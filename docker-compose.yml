@@ -1,0 +1,56 @@
+version: "3"
+services:
+  mysql_db:
+    image: "mysql:latest"
+    container_name: mysql_JSM
+    restart: unless-stopped
+    build: ./mysql/
+
+    environment:
+      MYSQL_ROOT_PASSWORD: "SECRET"
+
+    ports:
+      - "3306:3306"
+
+    expose:
+      - "3306"
+
+    volumes:
+      - ./mysql/startscript:/docker-entrypoint-initdb.d
+
+  postgresql_db:
+    image: "postgres:latest"
+    container_name: postgresql_JSM
+    restart: unless-stopped
+    build: ./postgresql/
+
+    environment:
+      POSTGRES_PASSWORD: "SECRET"
+
+    ports:
+      - "5432:5432"
+
+    expose:
+      - "5432"
+
+    volumes:
+      - ./postgresql/startscript:/docker-entrypoint-initdb.d
+
+  sqlserver_db:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    container_name: sqlserver_JSM
+    restart: unless-stopped
+    build: ./sqlserver/
+
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "thisIsSuperSecret1234321"
+
+    ports:
+      - "1433:1433"
+
+    expose:
+      - "1433"
+
+    volumes:
+      - ./sqlserver/startscript:/docker-entrypoint-initdb.d

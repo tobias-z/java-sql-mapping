@@ -11,8 +11,8 @@ public class PostgresSQLTestDBConfig implements DBConfig {
     public Map<DBSetting, String> getConfiguration() {
         Map<DBSetting, String> config = new HashMap<>();
         config.put(DBSetting.JDBC_DRIVER, "org.postgresql.Driver");
-        config.put(DBSetting.USER, "postgres");
-        config.put(DBSetting.PASSWORD, "ax2");
+        config.put(DBSetting.USER, "dev");
+        config.put(DBSetting.PASSWORD, "SECRET");
         config.put(DBSetting.URL, "jdbc:postgresql://localhost/chat_test");
         return config;
     }
