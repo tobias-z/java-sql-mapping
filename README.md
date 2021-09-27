@@ -5,7 +5,7 @@
 
 ---
 
-[![Build Status](https://travis-ci.com/tobias-z/java-sql-mapping.svg?branch=main)](https://travis-ci.com/tobias-z/java-sql-mapping)
+[![Build Status](https://img.shields.io/github/workflow/status/tobias-z/java-sql-mapping/validate)](https://travis-ci.com/tobias-z/java-sql-mapping.svg?branch=main)
 ![documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)
 ![GitHub](https://img.shields.io/github/license/tobias-z/java-sql-mapper)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
@@ -169,19 +169,18 @@ public class UserRepository {
         return createdUser;
     }
 
-    public User updateUser(int id, String username) throws Exception {
-        User updatedUser = db.update(connection -> {
+    public void updateUser(int id, String username) throws Exception {
+        db.executeQuery(connection -> {
             String sql = "UPDATE users SET username = ? WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
             preparedStatement.setInt(2, id);
             return preparedStatement;
-        }, User.class);
-        return updatedUser;
+        });
     }
 
     public void deleteUser(int id) throws Exception {
-        // Can also pass an SQLQuery
+        // Can also pass a DBStatement
         db.delete(id, User.class);
     }
 }
