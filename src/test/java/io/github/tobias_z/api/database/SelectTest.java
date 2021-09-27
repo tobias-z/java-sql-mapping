@@ -1,50 +1,44 @@
 package io.github.tobias_z.api.database;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import io.github.tobias_z.DBConfig;
-import io.github.tobias_z.entities.Role;
-import io.github.tobias_z.entities.User;
 import io.github.tobias_z.Database;
-import io.github.tobias_z.api.SQLQuery;
-import io.github.tobias_z.utils.BeforeEachSetup;
 import io.github.tobias_z.api.connection.DBConfigArgumentProvider;
-import io.github.tobias_z.utils.SetupIntegrationTests;
 import io.github.tobias_z.entities.NoIncrement;
+import io.github.tobias_z.entities.User;
 import io.github.tobias_z.exceptions.DatabaseException;
-import java.util.List;
+import io.github.tobias_z.utils.BeforeEachSetup;
+import io.github.tobias_z.utils.DBStatements;
+import io.github.tobias_z.utils.SetupIntegrationTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
+import java.sql.PreparedStatement;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class SelectTest extends SetupIntegrationTests {
 
-    SQLQuery insertUserQuery;
     String username = "Bob";
 
-    private static Database DB;
-
     private final BeforeEachSetup beforeEach = (database) -> {
-        insertUserQuery = new SQLQuery("INSERT INTO users (name, active, role) VALUES (:name, :active, :role)")
-            .addParameter("name", username)
-            .addParameter("active", false)
-            .addParameter("role", Role.ADMIN);
-        database.insert(insertUserQuery);
-        database.insert(insertUserQuery);
-        database.insert(insertUserQuery);
+        database.executeQuery(DBStatements.insertUser(username, false));
+        database.executeQuery(DBStatements.insertUser(username, false));
+        database.executeQuery(DBStatements.insertUser(username, false));
     };
 
     @ParameterizedTest(name = "{1}")
     @ArgumentsSource(DBConfigArgumentProvider.class)
     @DisplayName("should return a list of users with from name")
     void shouldReturnAListOfUsersWithFromName(DBConfig dbConfig, String dbName, String migrateFile)
-        throws Exception {
-        DB = setupTest(dbConfig, beforeEach, migrateFile);
-        SQLQuery query = new SQLQuery("SELECT * FROM users WHERE name = :name")
-            .addParameter("name", username);
-        List<User> users = DB.select(query, User.class);
+            throws Exception {
+        Database db = setupTest(dbConfig, beforeEach, migrateFile);
+        List<User> users = db.select(connection -> {
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM users WHERE name = ?");
+            ps.setString(1, username);
+            return ps;
+        }, User.class);
         assertEquals(3, users.size());
     }
 
@@ -52,21 +46,21 @@ public class SelectTest extends SetupIntegrationTests {
     @ArgumentsSource(DBConfigArgumentProvider.class)
     @DisplayName("should throw exception if query fails")
     void shouldThrowExceptionIfQueryFails(DBConfig dbConfig, String dbName, String migrateFile)
-        throws Exception {
-        DB = setupTest(dbConfig, beforeEach, migrateFile);
-        SQLQuery query = new SQLQuery("SELECT * FROM fails");
-        assertThrows(DatabaseException.class, () -> DB.select(query, NoIncrement.class));
+            throws Exception {
+        Database db = setupTest(dbConfig, beforeEach, migrateFile);
+        assertThrows(DatabaseException.class, () ->
+                db.select(connection -> connection.prepareStatement("SELECT * FROM fails"), NoIncrement.class));
     }
 
     @ParameterizedTest(name = "{1}")
     @ArgumentsSource(DBConfigArgumentProvider.class)
     @DisplayName("should return empty list of no increments when none exist")
     void shouldReturnEmptyListOfNoIncrementsWhenNoneExist(DBConfig dbConfig, String dbName,
-        String migrateFile)
-        throws Exception {
-        DB = setupTest(dbConfig, beforeEach, migrateFile);
-        SQLQuery query = new SQLQuery("SELECT * FROM no_increment");
-        List<NoIncrement> noIncrements = DB.select(query, NoIncrement.class);
+                                                          String migrateFile)
+            throws Exception {
+        Database db = setupTest(dbConfig, beforeEach, migrateFile);
+        List<NoIncrement> noIncrements = db.select(connection ->
+                connection.prepareStatement("SELECT * FROM no_increment"), NoIncrement.class);
         assertNotNull(noIncrements);
         assertEquals(0, noIncrements.size());
     }

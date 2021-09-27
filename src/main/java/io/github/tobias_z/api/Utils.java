@@ -8,28 +8,32 @@ import io.github.tobias_z.exceptions.NoGeneratedKeyFound;
 import io.github.tobias_z.exceptions.NoPrimaryKeyFound;
 import io.github.tobias_z.exceptions.NoTableFound;
 import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 class Utils {
 
-    <K> K getPrimaryKeyStringForSQL(K primaryKey) {
+    <T> T getPrimaryKeyStringForSQL(T primaryKey) {
         try {
             Integer.parseInt(String.valueOf(primaryKey));
         } catch (NumberFormatException e) {
-            primaryKey = (K) ("'" + primaryKey + "'");
+            primaryKey = (T) ("'" + primaryKey + "'");
         }
         return primaryKey;
     }
 
-    <T> Entry<String, Object> getPrimaryKeyAndValue(Class<T> dbTableClass, SQLQuery query)
-        throws NoPrimaryKeyFound {
+    <T> Entry<String, Object> getPrimaryKeyAndValue(Class<T> dbTableClass, ResultSet resultSet)
+            throws NoPrimaryKeyFound, SQLException {
         Field[] fields = dbTableClass.getDeclaredFields();
-        for (Field field : fields) {
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
             PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
             if (primaryKey != null) {
                 String key = field.getAnnotation(Column.class).name();
-                Object value = query.getParameters().get(key);
+                Object value = resultSet.getObject(i + 1);
                 try {
                     Integer.parseInt(String.valueOf(value));
                 } catch (NumberFormatException e) {
@@ -61,18 +65,16 @@ class Utils {
         return value;
     }
 
-    <T> Entry<String, Object> updateValueIfSettingPrimayKey(Class<T> dbTableClass, SQLQuery savedQuery, SQLQuery updatedQuery, Entry<String, Object> keyAndValue) {
+    <T> Entry<String, Object> updateValueIfSettingPrimayKey(Class<T> dbTableClass, PreparedStatement ps, ResultSet resultSet, Entry<String, Object> keyAndValue) throws SQLException {
         Object foundValue = keyAndValue.getValue();
         Field[] fields = dbTableClass.getDeclaredFields();
-        for (Field field : fields) {
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
             PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
             if (primaryKey != null) {
                 String primaryKeyName = field.getAnnotation(Column.class).name();
-                if (savedQuery.getSql().contains("SET " + primaryKeyName)) {
-                    String strAfterSetPrimaryKey = substringAfter(updatedQuery.getSql(), primaryKeyName);
-                    String strAfterDotOne = substringAfter(strAfterSetPrimaryKey, "'");
-                    String[] strArr = strAfterDotOne.split("'");
-                    foundValue = strArr[0];
+                if (ps.toString().contains("SET " + primaryKeyName)) {
+                    foundValue = resultSet.getObject(i + 1);
                     try {
                         Integer.parseInt(String.valueOf(foundValue));
                     } catch (NumberFormatException e) {

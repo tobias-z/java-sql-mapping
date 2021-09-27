@@ -39,14 +39,14 @@ connection, and then return the object corresponding to your query.
 <dependency>
   <groupId>io.github.tobias-z</groupId>
   <artifactId>java-sql-mapping</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
 </dependency>
 ```
 
 ### Gradle Groovy DSL
 
 ```
-implementation 'io.github.tobias-z:java-sql-mapping:1.0.3'
+implementation 'io.github.tobias-z:java-sql-mapping:1.0.4'
 ```
 
 For other methods see
@@ -54,7 +54,7 @@ For other methods see
 
 ## Supported
 
-Currently Java SQL Mapping has support for 3 databases:
+Currently, Java SQL Mapping has support for 3 databases:
 
 - MySQL
 - PostgreSQL
@@ -136,7 +136,6 @@ provide to the `DBConnection.createDatabase()` method
 
 ```java
 public class UserRepository {
-
     private static final Database db = DBConnection.createDatabase(new MySQLDBConfig());
 
     public User getUserById(int id) throws Exception {
@@ -150,27 +149,42 @@ public class UserRepository {
     }
 
     public List<User> findAllUsersWithRole(Role role) throws Exception {
-        SQLQuery query = new SQLQuery("SELECT * FROM users WHERE role = :role")
-            .addParameter("role", role);
-        List<User> users = db.select(query, User.class);
+        List<User> users = db.select(connection -> {
+            String sql = "SELECT * FROM users WHERE role = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, role.name());
+            return preparedStatement;
+        }, User.class);
         return users;
     }
 
     public User createUser(String username, String password) throws Exception {
         SQLQuery insertQuery = new SQLQuery(
-            "INSERT INTO users (username, password) VALUES (:username, :password)")
-            .addParameter("username", username)
-            .addParameter("password", password);
-        User createdUser = db.insert(insertQuery, User.class);
+                "")
+                .addParameter("username", username)
+                .addParameter("password", password);
+        User createdUser = db.insert(connection -> {
+            String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            return preparedStatement;
+        }, User.class);
         return createdUser;
     }
 
     public User updateUser(int id, String username) throws Exception {
         SQLQuery updateQuery = new SQLQuery(
-            "UPDATE users SET username = :username WHERE id = :id")
-            .addParameter("username", username)
-            .addParameter("id", id);
-        User updatedUser = db.update(updateQuery, User.class);
+                "UPDATE users SET username = :username WHERE id = :id")
+                .addParameter("username", username)
+                .addParameter("id", id);
+        User updatedUser = db.update(connection -> {
+            String sql = "UPDATE users SET username = ? WHERE id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            preparedStatement.setInt(2, id);
+            return preparedStatement;
+        }, User.class);
         return updatedUser;
     }
 
@@ -178,7 +192,6 @@ public class UserRepository {
         // Can also pass an SQLQuery
         db.delete(id, User.class);
     }
-
 }
 ```
 
