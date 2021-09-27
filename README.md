@@ -159,10 +159,6 @@ public class UserRepository {
     }
 
     public User createUser(String username, String password) throws Exception {
-        SQLQuery insertQuery = new SQLQuery(
-                "")
-                .addParameter("username", username)
-                .addParameter("password", password);
         User createdUser = db.insert(connection -> {
             String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -174,10 +170,6 @@ public class UserRepository {
     }
 
     public User updateUser(int id, String username) throws Exception {
-        SQLQuery updateQuery = new SQLQuery(
-                "UPDATE users SET username = :username WHERE id = :id")
-                .addParameter("username", username)
-                .addParameter("id", id);
         User updatedUser = db.update(connection -> {
             String sql = "UPDATE users SET username = ? WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
