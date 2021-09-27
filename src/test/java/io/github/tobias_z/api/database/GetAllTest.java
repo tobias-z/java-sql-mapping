@@ -3,11 +3,8 @@ package io.github.tobias_z.api.database;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.tobias_z.DBConfig;
-import io.github.tobias_z.DBStatement;
-import io.github.tobias_z.entities.Role;
 import io.github.tobias_z.entities.User;
 import io.github.tobias_z.Database;
-import io.github.tobias_z.api.SQLQuery;
 import io.github.tobias_z.utils.BeforeEachSetup;
 import io.github.tobias_z.api.connection.DBConfigArgumentProvider;
 import io.github.tobias_z.utils.DBStatements;

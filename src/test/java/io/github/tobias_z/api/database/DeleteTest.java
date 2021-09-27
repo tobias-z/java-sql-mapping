@@ -2,9 +2,7 @@ package io.github.tobias_z.api.database;
 
 import io.github.tobias_z.DBConfig;
 import io.github.tobias_z.Database;
-import io.github.tobias_z.api.SQLQuery;
 import io.github.tobias_z.api.connection.DBConfigArgumentProvider;
-import io.github.tobias_z.entities.Role;
 import io.github.tobias_z.entities.User;
 import io.github.tobias_z.exceptions.DatabaseException;
 import io.github.tobias_z.utils.BeforeEachSetup;

@@ -43,24 +43,6 @@ class DatabaseRepository implements Database {
         return DriverManager.getConnection(url, user, password);
     }
 
-    private void generateFullSQLStatement(SQLQuery query) {
-        query.getParameters()
-                .forEach((name, value) -> {
-                    String valueToUse = value;
-                    String url = config.getConfiguration().get(DBSetting.URL);
-                    if (url.contains("mysql")) {
-                        valueToUse = utils.getTinyIntIfBooleanType(value);
-                    }
-                    try {
-                        Integer.parseInt(valueToUse);
-                    } catch (NumberFormatException e) {
-                        valueToUse = "'" + valueToUse + "'";
-                    }
-                    query.setSql(query.getSql().replace(":" + name, valueToUse));
-                });
-    }
-
-
     @Override
     public <T> T insert(DBStatement statement, Class<T> dbTableClass)
             throws DatabaseException, NoGeneratedKeyFound, NoPrimaryKeyFound, NoTableFound {
